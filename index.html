@@ -11,6 +11,26 @@
   <div class="app-shell">
     <canvas id="background-canvas"></canvas>
 
+    <div id="game-overlay" class="hidden" aria-live="polite">
+      <div class="game-header">
+        <div class="hud-left">
+          <div class="health-wrap">
+            <span>Jogador</span>
+            <div class="health-bar"><i id="player-health-fill"></i></div>
+          </div>
+          <div class="health-wrap">
+            <span>Bot</span>
+            <div class="health-bar enemy"><i id="bot-health-fill"></i></div>
+          </div>
+        </div>
+        <div class="hud-right">
+          <button id="exit-game" type="button">Sair</button>
+        </div>
+      </div>
+      <canvas id="game-canvas" width="1280" height="720"></canvas>
+      <div id="game-message" class="game-message hidden"></div>
+    </div>
+
     <header class="topbar">
       <div class="brand-wrap">
         <div class="brand-mark">RB</div>
@@ -172,5 +192,6 @@
 
   <script src="js/data.js"></script>
   <script src="js/ui.js"></script>
+  <script src="js/game.js"></script>
 </body>
 </html>

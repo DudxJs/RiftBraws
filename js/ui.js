@@ -216,6 +216,9 @@ document.addEventListener("DOMContentLoaded", () => {
   if (trainBtn) {
     trainBtn.addEventListener("click", () => {
       if (statusMessage) statusMessage.textContent = "Treino vs Bot iniciado.";
+      if (typeof window.startGame === "function") {
+        window.startGame();
+      }
     });
   }
 
