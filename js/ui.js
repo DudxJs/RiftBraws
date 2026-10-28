@@ -22,9 +22,11 @@ document.addEventListener("DOMContentLoaded", () => {
   const vibrationToggle = document.getElementById("vibration-toggle");
 
   function renderNav() {
+    if (!nav) return;
+
     nav.innerHTML = navItems
       .map(item => `
-        <button class="${item.id === "home" ? "active" : ""}" data-page="${item.id}">
+        <button class="${item.id === "home" ? "active" : ""}" data-page="${item.id}" type="button">
           ${item.label}
         </button>
       `)
@@ -46,20 +48,22 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function renderSummary() {
-    const intro = `
-      <strong>Modo:</strong> Treino, sala local e partidas rápidas<br>
-      <strong>Modo de jogo:</strong> plataforma fighter 2D com knockback e arenas de combate<br>
-      <strong>Foco:</strong> ataque em combo, manipulação de mapas e ultimates concludentes
-    `;
+    if (!summary) return;
 
-    summary.innerHTML = intro;
+    summary.innerHTML = `
+      <strong>Modo:</strong> Treino, sala local e partidas rápidas<br>
+      <strong>Modo de jogo:</strong> plataforma fighter 2D com knockback, knockback em arco e arenas de combate<br>
+      <strong>Foco:</strong> ataque em combo, manipulação de mapas, ultimates e controle de espaço
+    `;
   }
 
   function renderLegendCards() {
+    if (!legendGrid) return;
+
     legendGrid.innerHTML = legendData.map(legend => `
       <article class="card">
         <span class="card-badge">${legend.type}</span>
-        <div class="character-portrait" style="background: linear-gradient(140deg, rgba(124,155,255,0.34), rgba(72,209,255,0.18)), linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));"></div>
+        <div class="character-portrait" style="background: linear-gradient(140deg, rgba(127,155,255,0.34), rgba(83,212,255,0.18));"></div>
 
         <div class="character-header">
           <h3>${legend.name}</h3>
@@ -80,6 +84,8 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function renderWeaponCards() {
+    if (!weaponGrid) return;
+
     weaponGrid.innerHTML = weaponData.map(weapon => `
       <article class="card">
         <span class="card-badge" style="background: ${weapon.color}22; border-color: ${weapon.color}80;">${weapon.style}</span>
@@ -92,11 +98,14 @@ document.addEventListener("DOMContentLoaded", () => {
           <div class="stat-pill"><strong>Dano</strong><br>${weapon.damage}</div>
           <div class="stat-pill"><strong>Alcance</strong><br>${weapon.range}</div>
         </div>
+        <div class="skin-chip">${weapon.description}</div>
       </article>
     `).join("");
   }
 
   function renderSkinCards() {
+    if (!skinGrid) return;
+
     skinGrid.innerHTML = skinData.map(skin => `
       <article class="card">
         <span class="card-badge">${skin.type}</span>
@@ -109,15 +118,18 @@ document.addEventListener("DOMContentLoaded", () => {
           <div class="stat-pill"><strong>Aura</strong><br>${skin.aura}</div>
           <div class="stat-pill"><strong>Variante</strong><br>${skin.variant}</div>
         </div>
+        <div class="skin-chip">${skin.effect}</div>
       </article>
     `).join("");
   }
 
   function renderMapCards() {
+    if (!mapGrid) return;
+
     mapGrid.innerHTML = mapData.map(map => `
       <article class="card">
         <span class="card-badge">${map.size}</span>
-        <div class="character-portrait" style="background: linear-gradient(140deg, rgba(124,155,255,0.26), rgba(124,255,194,0.18));"></div>
+        <div class="character-portrait" style="background: linear-gradient(140deg, rgba(127,155,255,0.26), rgba(127,255,194,0.18));"></div>
         <div class="character-header">
           <h3>${map.name}</h3>
           <span class="tag">${map.theme}</span>
@@ -126,38 +138,40 @@ document.addEventListener("DOMContentLoaded", () => {
           <div class="stat-pill"><strong>Perigo</strong><br>${map.danger}</div>
           <div class="stat-pill"><strong>Estilo</strong><br>${map.theme}</div>
         </div>
+        <div class="skin-chip">${map.description}</div>
       </article>
     `).join("");
   }
 
   function applySettingsToInputs(settings) {
-    settingsName.value = settings.userName;
-    graphicsQuality.value = settings.graphics;
-    fullscreenToggle.checked = settings.fullscreen;
-    soundToggle.checked = settings.sound;
-    vibrationToggle.checked = settings.vibration;
+    if (settingsName) settingsName.value = settings.userName;
+    if (graphicsQuality) graphicsQuality.value = settings.graphics;
+    if (fullscreenToggle) fullscreenToggle.checked = settings.fullscreen;
+    if (soundToggle) soundToggle.checked = settings.sound;
+    if (vibrationToggle) vibrationToggle.checked = settings.vibration;
 
-    playerNameInput.value = settings.userName;
+    if (playerNameInput) playerNameInput.value = settings.userName;
   }
 
   function saveSettings() {
     const newSettings = {
-      userName: settingsName.value || defaultSettings.userName,
-      graphics: graphicsQuality.value || defaultSettings.graphics,
-      fullscreen: fullscreenToggle.checked,
-      sound: soundToggle.checked,
-      vibration: vibrationToggle.checked
+      userName: settingsName ? (settingsName.value || defaultSettings.userName) : defaultSettings.userName,
+      graphics: graphicsQuality ? (graphicsQuality.value || defaultSettings.graphics) : defaultSettings.graphics,
+      fullscreen: fullscreenToggle ? fullscreenToggle.checked : defaultSettings.fullscreen,
+      sound: soundToggle ? soundToggle.checked : defaultSettings.sound,
+      vibration: vibrationToggle ? vibrationToggle.checked : defaultSettings.vibration
     };
 
     localStorage.setItem("riftbrawl-settings", JSON.stringify(newSettings));
     applySettingsToInputs(newSettings);
-    playerNameInput.value = newSettings.userName;
 
     if (statusMessage) {
       statusMessage.textContent = "Configuração salva.";
     }
 
-    configModal.classList.add("hidden");
+    if (configModal) {
+      configModal.classList.add("hidden");
+    }
   }
 
   function resetSettings() {
@@ -166,33 +180,67 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function loadSettings() {
-    const saved = JSON.parse(localStorage.getItem("riftbrawl-settings") || "null");
-    const settings = saved || defaultSettings;
-    applySettingsToInputs(settings);
-    playerNameInput.value = settings.userName;
+    try {
+      const saved = JSON.parse(localStorage.getItem("riftbrawl-settings") || "null");
+      const settings = saved || defaultSettings;
+      applySettingsToInputs(settings);
+    } catch (error) {
+      applySettingsToInputs(defaultSettings);
+    }
   }
 
-  openConfigBtn.addEventListener("click", () => configModal.classList.remove("hidden"));
-  closeConfigBtn.addEventListener("click", () => configModal.classList.add("hidden"));
-  saveSettingsBtn.addEventListener("click", saveSettings);
-  resetSettingsBtn.addEventListener("click", resetSettings);
+  if (openConfigBtn) {
+    openConfigBtn.addEventListener("click", () => {
+      if (configModal) configModal.classList.remove("hidden");
+    });
+  }
 
-  document.getElementById("btn-train").addEventListener("click", () => {
-    statusMessage.textContent = "Treino vs Bot iniciado.";
-  });
+  if (closeConfigBtn) {
+    closeConfigBtn.addEventListener("click", () => {
+      if (configModal) configModal.classList.add("hidden");
+    });
+  }
 
-  document.getElementById("btn-lobby").addEventListener("click", () => {
-    statusMessage.textContent = "Sala criada com sucesso.";
-  });
+  if (saveSettingsBtn) {
+    saveSettingsBtn.addEventListener("click", saveSettings);
+  }
 
-  document.getElementById("btn-join").addEventListener("click", () => {
-    const code = roomCodeInput.value.trim();
-    statusMessage.textContent = code ? `Entrando na sala ${code}` : "Digite um código válido.";
-  });
+  if (resetSettingsBtn) {
+    resetSettingsBtn.addEventListener("click", resetSettings);
+  }
 
-  playerNameInput.addEventListener("input", (event) => {
-    statusMessage.textContent = `Jogador: ${event.target.value || "Seu nome"}`;
-  });
+  const trainBtn = document.getElementById("btn-train");
+  const lobbyBtn = document.getElementById("btn-lobby");
+  const joinBtn = document.getElementById("btn-join");
+
+  if (trainBtn) {
+    trainBtn.addEventListener("click", () => {
+      if (statusMessage) statusMessage.textContent = "Treino vs Bot iniciado.";
+    });
+  }
+
+  if (lobbyBtn) {
+    lobbyBtn.addEventListener("click", () => {
+      if (statusMessage) statusMessage.textContent = "Sala criada com sucesso.";
+    });
+  }
+
+  if (joinBtn) {
+    joinBtn.addEventListener("click", () => {
+      const code = roomCodeInput ? roomCodeInput.value.trim() : "";
+      if (statusMessage) {
+        statusMessage.textContent = code ? `Entrando na sala ${code}` : "Digite um código válido.";
+      }
+    });
+  }
+
+  if (playerNameInput) {
+    playerNameInput.addEventListener("input", (event) => {
+      if (statusMessage) {
+        statusMessage.textContent = `Jogador: ${event.target.value || "Seu nome"}`;
+      }
+    });
+  }
 
   renderNav();
   renderSummary();

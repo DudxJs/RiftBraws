@@ -4,6 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Rift Brawl</title>
+  <meta name="description" content="Rift Brawl — arena 2D de plataforma fighter inspirada em Brawlhalla" />
   <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
@@ -19,9 +20,9 @@
         </div>
       </div>
 
-      <nav class="main-nav" id="main-nav"></nav>
+      <nav class="main-nav" id="main-nav" aria-label="Navegação principal"></nav>
 
-      <button class="config-button" id="open-config">Config</button>
+      <button class="config-button" id="open-config" type="button">Config</button>
     </header>
 
     <main class="page-content">
@@ -42,13 +43,13 @@
             </label>
 
             <div class="buttons-row">
-              <button class="primary" id="btn-train">Treino vs Bot</button>
-              <button class="secondary" id="btn-lobby">Criar sala</button>
+              <button class="primary" id="btn-train" type="button">Treino vs Bot</button>
+              <button class="secondary" id="btn-lobby" type="button">Criar sala</button>
             </div>
 
             <div class="join-row">
               <input id="room-code" maxlength="5" placeholder="CÓDIGO" />
-              <button class="primary" id="btn-join">Entrar na sala</button>
+              <button class="primary" id="btn-join" type="button">Entrar na sala</button>
             </div>
 
             <small id="status-message"></small>
@@ -128,7 +129,7 @@
     <div class="modal-card">
       <div class="modal-header">
         <h3>Configurações</h3>
-        <button class="icon-button" id="close-config">✕</button>
+        <button class="icon-button" id="close-config" type="button">✕</button>
       </div>
 
       <div class="settings">
@@ -162,8 +163,8 @@
         </label>
 
         <div class="buttons-row">
-          <button class="secondary" id="reset-settings">Resetar</button>
-          <button class="primary" id="save-settings">Salvar</button>
+          <button class="secondary" id="reset-settings" type="button">Resetar</button>
+          <button class="primary" id="save-settings" type="button">Salvar</button>
         </div>
       </div>
     </div>
