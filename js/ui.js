@@ -213,26 +213,33 @@ document.addEventListener("DOMContentLoaded", () => {
   const lobbyBtn = document.getElementById("btn-lobby");
   const joinBtn = document.getElementById("btn-join");
 
+  function startMatch(mode = "bot") {
+    if (statusMessage) {
+      statusMessage.textContent = mode === "bot" ? "Treino vs Bot iniciado." : "Sala iniciada.";
+    }
+    if (typeof window.startGame === "function") {
+      window.startGame();
+    }
+  }
+
   if (trainBtn) {
-    trainBtn.addEventListener("click", () => {
-      if (statusMessage) statusMessage.textContent = "Treino vs Bot iniciado.";
-      if (typeof window.startGame === "function") {
-        window.startGame();
-      }
-    });
+    trainBtn.addEventListener("click", () => startMatch("bot"));
   }
 
   if (lobbyBtn) {
-    lobbyBtn.addEventListener("click", () => {
-      if (statusMessage) statusMessage.textContent = "Sala criada com sucesso.";
-    });
+    lobbyBtn.addEventListener("click", () => startMatch("lobby"));
   }
 
   if (joinBtn) {
     joinBtn.addEventListener("click", () => {
       const code = roomCodeInput ? roomCodeInput.value.trim() : "";
-      if (statusMessage) {
-        statusMessage.textContent = code ? `Entrando na sala ${code}` : "Digite um código válido.";
+      if (!code) {
+        if (statusMessage) statusMessage.textContent = "Digite um código válido.";
+        return;
+      }
+      if (statusMessage) statusMessage.textContent = `Entrando na sala ${code}`;
+      if (typeof window.startGame === "function") {
+        window.startGame();
       }
     });
   }
