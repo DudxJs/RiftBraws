@@ -5,7 +5,8 @@ const arena = {
   floorY: 640,
   lastTime: 0,
   running: false,
-  winner: null
+  winner: null,
+  started: false
 };
 
 const keys = {};
@@ -35,12 +36,11 @@ function createFighter({ x, y, color, name, facing = 1, isBot = false }) {
     attackTimer: 0,
     heavyCooldown: 0,
     isBot,
-    lastHitAt: 0,
     hitFlash: 0
   };
 }
 
-const player = createFighter({ x: 180, y: 560, color: '#7fe7a8', name: 'Jogador', facing: 1, isBot: false });
+const player = createFighter({ x: 180, y: 560, color: '#7fe7a8', name: 'Jogador', facing: 1 });
 const bot = createFighter({ x: 990, y: 560, color: '#ff8d70', name: 'Bot', facing: -1, isBot: true });
 
 function setCanvasSize() {
@@ -120,6 +120,7 @@ function resetStage() {
   bot.facing = -1;
 
   arena.running = true;
+  arena.started = true;
   arena.winner = null;
   updateHud();
   setMessage('');
@@ -128,18 +129,24 @@ function resetStage() {
 function showMainMenu() {
   const overlay = document.getElementById('game-overlay');
   if (overlay) overlay.classList.add('hidden');
-  document.querySelectorAll('.page').forEach(page => page.classList.add('active'));
+
+  document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
   const home = document.getElementById('page-home');
   if (home) home.classList.add('active');
+
   arena.running = false;
+  arena.started = false;
 }
 
 function startGame() {
   setCanvasSize();
   resetStage();
+
   const overlay = document.getElementById('game-overlay');
   if (overlay) overlay.classList.remove('hidden');
+
   document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
+  document.querySelectorAll('.main-nav button').forEach(btn => btn.classList.remove('active'));
 }
 
 function stopGame() {
@@ -159,11 +166,11 @@ function attackFighter(attacker, defender, heavy = false) {
 
   const damage = heavy ? 18 : 10;
   const force = heavy ? 780 : 540;
+
   defender.health = clamp(defender.health - damage, 0, 100);
   defender.vx = (attacker.x < defender.x ? 1 : -1) * force;
   defender.vy = -280;
   defender.hitFlash = 0.12;
-  defender.lastHitAt = performance.now();
 
   if (defender.health <= 0) {
     arena.winner = attacker.name;
@@ -181,11 +188,11 @@ function updateFighter(fighter, dt, controlState, isBot = false) {
   fighter.heavyCooldown = Math.max(0, fighter.heavyCooldown - dt);
   fighter.hitFlash = Math.max(0, fighter.hitFlash - dt);
 
-  const moveLeft = controlState.left;
-  const moveRight = controlState.right;
-  const jump = controlState.jump;
-  const attack = controlState.attack;
-  const heavy = controlState.heavy;
+  const moveLeft = !!controlState.left;
+  const moveRight = !!controlState.right;
+  const jump = !!controlState.jump;
+  const attack = !!controlState.attack;
+  const heavy = !!controlState.heavy;
 
   if (moveLeft) fighter.vx = -fighter.speed;
   else if (moveRight) fighter.vx = fighter.speed;
@@ -201,7 +208,6 @@ function updateFighter(fighter, dt, controlState, isBot = false) {
   fighter.vy += arena.gravity * dt;
   fighter.x += fighter.vx * dt;
   fighter.y += fighter.vy * dt;
-
   fighter.x = clamp(fighter.x, 0, arena.width - fighter.w);
 
   let grounded = false;
@@ -219,9 +225,7 @@ function updateFighter(fighter, dt, controlState, isBot = false) {
     }
   }
 
-  if (!grounded) {
-    fighter.onGround = false;
-  }
+  if (!grounded) fighter.onGround = false;
 
   if (fighter.y > arena.height + 200) {
     fighter.health = 0;
@@ -230,7 +234,6 @@ function updateFighter(fighter, dt, controlState, isBot = false) {
     setMessage(`${arena.winner} venceu! Pressione R para recomeçar.`);
   }
 
-  fighter.attackTimer = Math.max(0, fighter.attackTimer - dt);
   if (attack && fighter.attackCooldown <= 0) {
     fighter.attackCooldown = 0.32;
     fighter.attackTimer = 0.16;
@@ -242,6 +245,8 @@ function updateFighter(fighter, dt, controlState, isBot = false) {
     fighter.attackTimer = 0.22;
     attackFighter(fighter, isBot ? player : bot, true);
   }
+
+  fighter.attackTimer = Math.max(0, fighter.attackTimer - dt);
 }
 
 function updateBot(dt) {
@@ -254,8 +259,8 @@ function updateBot(dt) {
     nextState.left = deltaX < 0;
   }
 
-  if (Math.abs(deltaX) < 90 && bot.onGround) {
-    if (Math.random() < 0.022) nextState.jump = true;
+  if (Math.abs(deltaX) < 90 && bot.onGround && Math.random() < 0.022) {
+    nextState.jump = true;
   }
 
   if (Math.abs(deltaX) < 90 && bot.attackCooldown <= 0) {
@@ -271,11 +276,11 @@ function updateBot(dt) {
 
 function updatePlayer(dt) {
   const playerKeyState = {
-    left: keys['KeyA'] || keys['ArrowLeft'],
-    right: keys['KeyD'] || keys['ArrowRight'],
-    jump: keys['KeyW'] || keys['ArrowUp'] || keys['Space'],
-    attack: keys['KeyJ'] || keys['KeyZ'],
-    heavy: keys['KeyK'] || keys['KeyX']
+    left: !!(keys['KeyA'] || keys['ArrowLeft']),
+    right: !!(keys['KeyD'] || keys['ArrowRight']),
+    jump: !!(keys['KeyW'] || keys['ArrowUp'] || keys['Space']),
+    attack: !!(keys['KeyJ'] || keys['KeyZ']),
+    heavy: !!(keys['KeyK'] || keys['KeyX'])
   };
 
   updateFighter(player, dt, playerKeyState, false);
@@ -348,6 +353,8 @@ function render() {
   }
 }
 
+let animationFrameId = null;
+
 function loop(timestamp) {
   const delta = Math.min((timestamp - arena.lastTime) / 1000 || 0.016, 0.033);
   arena.lastTime = timestamp;
@@ -355,12 +362,11 @@ function loop(timestamp) {
   if (arena.running) {
     updatePlayer(delta);
     updateBot(delta);
-    render();
-  } else {
-    render();
   }
 
-  requestAnimationFrame(loop);
+  render();
+
+  animationFrameId = requestAnimationFrame(loop);
 }
 
 function bindGameControls() {
@@ -390,9 +396,11 @@ function initGame() {
   setCanvasSize();
   updateHud();
   bindGameControls();
-  resetStage();
+  showMainMenu();
   render();
-  requestAnimationFrame(loop);
+  if (!animationFrameId) {
+    animationFrameId = requestAnimationFrame(loop);
+  }
 }
 
 window.startGame = startGame;
