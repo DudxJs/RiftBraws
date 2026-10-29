@@ -63,7 +63,7 @@ function step(p,I,t){const c=LG[p.c],pd=I&~p.pi;p.pi=I;
 function ai(p){const o=G.ps.filter(q=>q!=p&&!q.out&&q.rs<=0).sort((a,b)=>Math.abs(a.x-p.x)-Math.abs(b.x-p.x))[0];
  if(p.rs>0||!o)return 0;let I=0;const dx=o.x-p.x,dy=o.y-p.y,r=Math.random();
  if(p.x<260||p.x>940||p.y>540){I|=p.x<600?2:1;if(p.y>400&&p.vy>0||r<.03)I|=16;return I}
- if(p.cur<0){const it=G.items.find(i=>!i.th&&LG[p.c].w.includes(i.w));if(it){const d=it.x-p.x;if(Math.abs(d)>20)I|=d>0?2:1;else I|=512;if(it.y<p.y-60&&r<.05)I|=16;return I}}
+ if(p.cur<0){const it=G.items.find(i=>!i.th&&LG[p.c].w.includes(i.w)&&i.y>p.y-110&&i.y<p.y+60);if(it){const d=it.x-p.x;if(Math.abs(d)>20)I|=d>0?2:1;else I|=512;if(it.y<p.y-60&&r<.05)I|=16;return I}}
  if(Math.abs(dx)>70)I|=dx>0?2:1;
  if(dy<-80&&r<.05)I|=16|4;
  if(Math.abs(dx)<130&&Math.abs(dy)<90&&r<.1)I|=r<.05?32:64;

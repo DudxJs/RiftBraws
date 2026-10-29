@@ -10,7 +10,15 @@ function newP(name,c,bot){return{id:++nid,name,c,bot,sk:0,cur:-1,has:[0,0],x:600
 const KM={KeyA:1,ArrowLeft:1,KeyD:2,ArrowRight:2,KeyW:20,ArrowUp:20,Space:16,KeyS:8,ArrowDown:8,KeyJ:32,KeyZ:32,KeyK:64,KeyX:64,KeyL:128,KeyC:128,KeyI:256,KeyV:256,KeyE:512,KeyB:512,KeyQ:1024,KeyN:1024};
 addEventListener('keydown',e=>{if(e.code=='Escape'&&mode&&confirm('Sair da partida?'))location.reload();if(KM[e.code]){keys[e.code]=1;if(mode)e.preventDefault()}});
 addEventListener('keyup',e=>delete keys[e.code]);addEventListener('blur',()=>keys={});
-const getInput=()=>Object.keys(keys).reduce((a,k)=>a|KM[k],0);
+let tm=0;const getInput=()=>Object.keys(keys).reduce((a,k)=>a|KM[k],tm);
 let ac;function sfx(k){if(!CFG.snd||!CFG.vol)return;try{ac=ac||new AudioContext();const o=ac.createOscillator(),v=ac.createGain(),t=ac.currentTime;
  o.type=k=='h'?'square':'sawtooth';o.frequency.setValueAtTime(k=='h'?200:80,t);o.frequency.exponentialRampToValueAtTime(40,t+.15);
  v.gain.setValueAtTime(CFG.vol*.15,t);v.gain.exponentialRampToValueAtTime(.0005,t+.2);o.connect(v);v.connect(ac.destination);o.start();o.stop(t+.2)}catch(e){}}
+
+// Controles de toque (aparecem só em telas touch)
+const tc=document.createElement('div');tc.id='tc';
+[['◀',1,'l1'],['▶',2,'l2'],['▲',4,'l3'],['▼',8,'l4'],['PULO',16,'r1'],['J',32,'r2'],['K',64,'r3'],['ESQ',128,'r4'],['ULT',256,'r5'],['E',512,'r6']].forEach(([t,b,c])=>{
+ const e=document.createElement('button');e.textContent=t;e.className=c;
+ e.onpointerdown=ev=>{ev.preventDefault();tm|=b;e.classList.add('on')};
+ ['pointerup','pointercancel','pointerleave'].forEach(n=>e['on'+n]=()=>{tm&=~b;e.classList.remove('on')});tc.appendChild(e)});
+document.body.appendChild(tc);
