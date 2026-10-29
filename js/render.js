@@ -57,7 +57,7 @@ function draw(){const st=storm(G.t),T=G.t%1800,tt=performance.now()/1000;g.save(
   g.textAlign='left';g.fillStyle=col;g.font='bold 14px system-ui';g.fillText(p.name+' · '+LG[p.c].n,x+12,y+20);
   g.fillStyle='#fffa';g.font='12px system-ui';g.fillText(p.cur>=0?WP[p.cur].n:'Desarmado',x+190,y+20);
   const k=Math.min(1,p.dmg/150);g.fillStyle=`rgb(255,${255-k*200|0},${255-k*200|0})`;g.font='bold 34px system-ui';g.fillText(p.dmg+'%',x+12,y+56);
-  for(let s=0;s<CFG.stocks;s++){g.fillStyle=s<p.stocks?col:'#fff2';g.beginPath();g.arc(x+150+s*18,y+44,6,0,6.3);g.fill()}
+  for(let s=0;s<Math.max(CFG.stocks,p.stocks);s++){g.fillStyle=s<p.stocks?col:'#fff2';g.beginPath();g.arc(x+150+s*18,y+44,6,0,6.3);g.fill()}
   g.fillStyle='#fff2';g.fillRect(x+12,y+64,251,7);g.fillStyle=p.ult>=100?'#ffd166':'#7aa2ff';g.fillRect(x+12,y+64,251*p.ult/100,7)});
  g.textAlign='center';g.fillStyle='#fff';g.font='bold 22px system-ui';
  if(mode=='h')g.fillText('Sala: '+code+'  ('+G.ps.length+'/4)  — passe o código aos amigos',W/2,30);
@@ -71,5 +71,5 @@ let acc=0,last=performance.now(),lastI=-1,kk=0;
 function loop(now){acc+=Math.min(100,now-last);last=now;fpsN++;if(now-fpsT>1000){fps=fpsN;fpsN=0;fpsT=now}
  if(mode=='h'||mode=='l')while(acc>=16.67){tick();acc-=16.67}else acc=0;
  if(mode=='gst'&&conn&&conn.open){const i=getInput();if(i!=lastI||++kk%4==0){conn.send({t:'i',i});lastI=i}}
- if(mode)draw();requestAnimationFrame(loop)}
+ if(mode&&!G.lobby)draw();requestAnimationFrame(loop)}
 requestAnimationFrame(loop);

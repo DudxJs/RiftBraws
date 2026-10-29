@@ -5,7 +5,7 @@ function hb(p){if(p.ak==3)return{x:p.x,y:p.y-28,r:170,circ:1};
  if(p.ad==1){x=p.x;y=p.y-56-r*.45;w=s+20;h=r}else if(p.ad==2){x=p.x;y=p.y+r*.3;w=s+20;h=r}
  return{x,y,w,h}}
 function pick(p){const w=LG[p.c].w,it=G.items.find(i=>!i.th&&w.includes(i.w)&&Math.abs(i.x-p.x)<46&&Math.abs(i.y-(p.y-20))<56);
- if(it){G.items.splice(G.items.indexOf(it),1);p.has[w.indexOf(it.w)]=1;p.cur=it.w}
+ if(it){G.items.splice(G.items.indexOf(it),1);p.has[w.indexOf(it.w)]=1;p.cur=it.w;fx(['s',0,0,'p'])}
  else if(p.cur>=0){const k=w.indexOf(p.cur);G.items.push({id:++iid,w:p.cur,x:p.x,y:p.y-30,vx:p.f*13,vy:-2,th:p.id});p.has[k]=0;p.cur=p.has[1-k]?w[1-k]:-1}}
 function itemsTick(){
  for(const i of G.items){i.vy+=.6;const py=i.y;i.x+=i.vx;i.y+=i.vy;i.vx*=i.th?.995:.9;
@@ -16,7 +16,7 @@ function itemsTick(){
  G.items=G.items.filter(i=>!i.dead);
  if(G.t%300==30&&G.items.length<3&&G.ps.length){const ws=G.ps.flatMap(p=>LG[p.c].w);G.items.push({id:++iid,w:ws[Math.random()*ws.length|0],x:350+Math.random()*500,y:-30,vx:0,vy:0,th:0})}}
 function fx(e){if(mode=='h')outq.push(e);fxh(e)}
-function fxh(e){const[k,x,y,m]=e,n=CFG.parts?(k=='h'?8+(m|0):30):0;sfx(k);if(CFG.shake)shake=Math.max(shake,k=='h'?Math.min(m/2,12):16);
+function fxh(e){const[k,x,y,m]=e;if(k=='s')return sfx(m);sfx(k);const n=CFG.parts?(k=='h'?8+(m|0):30):0;if(CFG.shake)shake=Math.max(shake,k=='h'?Math.min(m/2,12):16);
  for(let i=0;i<n;i++){const a=Math.random()*6.28,s=Math.random()*(k=='h'?5:10)+2;parts.push({x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s,l:30,c:k=='h'?'#fff':COLS[m%4]})}}
 function strike(p,a){const b=hb(p);
  for(const q of G.ps){if(q==p||q.out||q.rs>0||q.inv>0||p.hit.includes(q.id))continue;
@@ -36,11 +36,11 @@ function step(p,I,t){const c=LG[p.c],pd=I&~p.pi;p.pi=I;
  ['inv','cd','hs','dt'].forEach(k=>p[k]>0&&p[k]--);
  const free=p.hs<=0&&!p.ak&&!p.dg;
  if(free&&dir)p.f=dir;
- if(free&&p.cd<=0&&pd&128){p.dg=14;p.inv=16;p.cd=70-c.dex*3;p.vx=(dir||p.f)*11;p.vy=0}
+ if(free&&p.cd<=0&&pd&128){p.dg=14;p.inv=16;fx(['s',0,0,'d']);p.cd=70-c.dex*3;p.vx=(dir||p.f)*11;p.vy=0}
  else if(free){
-  if(pd&96){p.ak=pd&32?1:2;p.at=0;p.ad=I&4?1:(D&&!p.g?2:0);p.hit=[]}
-  else if(pd&256&&p.ult>=100){p.ak=3;p.at=0;p.ad=0;p.hit=[];p.ult=0}
-  if(pd&16&&p.jumps>0){p.vy=-c.jp;p.jumps--;p.g=0}
+  if(pd&96){p.ak=pd&32?1:2;fx(['s',0,0,'a']);p.at=0;p.ad=I&4?1:(D&&!p.g?2:0);p.hit=[]}
+  else if(pd&256&&p.ult>=100){p.ak=3;fx(['s',0,0,'u']);p.at=0;p.ad=0;p.hit=[];p.ult=0}
+  if(pd&16&&p.jumps>0){p.vy=-c.jp;p.jumps--;p.g=0;fx(['s',0,0,'j'])}
   if(pd&1024&&p.has[0]&&p.has[1])p.cur=p.cur==c.w[0]?c.w[1]:c.w[0];
   if(pd&512)pick(p)}
  if(p.dg){p.vy=0;p.vx*=.88;p.dg--}
@@ -72,12 +72,13 @@ function ai(p){const o=G.ps.filter(q=>q!=p&&!q.out&&q.rs<=0).sort((a,b)=>Math.ab
  return I}
 function reset(){G.ps.forEach(p=>{p.stocks=CFG.stocks;p.cur=-1;p.has=[0,0];p.dmg=0;p.ult=0;p.out=0;p.rs=40;p.ak=0;p.hs=0;p.dg=0});G.win=null;G.items=[]}
 function tick(){G.t++;PL=plats(G.t);itemsTick();
+ if(G.lobby){for(const p of G.ps){p.rs=40;p.stocks=CFG.stocks;p.dmg=0;p.cur=-1;p.has=[0,0];p.ult=0}G.items=[];G.win=null}
  for(const p of G.ps){let I;if(p.id==me)I=getInput();else if(p.bot)I=ai(p);else{I=p.raw|p.press;p.press=0}step(p,I,G.t)}
  const al=G.ps.filter(p=>!p.out);
- if(!G.win&&G.ps.length>1&&al.length<=1){G.win=al[0]?al[0].name:'Empate';G.wt=200}
+ if(!G.win&&G.ps.length>1&&al.length<=1){G.win=al[0]?al[0].name:'Empate';G.wt=200;fx(['s',0,0,'w'])}
  if(G.win&&--G.wt<=0)reset();
- if(mode=='h'&&G.t%2==0){const s={t:'s',tm:G.t,w:G.win,i:G.items.map(i=>[i.w,i.x,i.y,i.th?1:0]),fx:outq.splice(0),p:G.ps.map(p=>[p.id,p.x,p.y,p.f,p.dmg|0,p.stocks,p.c,p.ak,p.at,p.ad,p.inv,p.ult|0,p.rs,p.g,p.hs,p.dg,p.name,p.out,p.sk,p.cur])};
+ if(mode=='h'&&G.t%2==0){const s={t:'s',tm:G.t,w:G.win,l:G.lobby,i:G.items.map(i=>[i.w,i.x,i.y,i.th?1:0]),fx:outq.splice(0),p:G.ps.map(p=>[p.id,p.x,p.y,p.f,p.dmg|0,p.stocks,p.c,p.ak,p.at,p.ad,p.inv,p.ult|0,p.rs,p.g,p.hs,p.dg,p.name,p.out,p.sk,p.cur])};
   Object.values(conns).forEach(c=>c.open&&c.send(s))}}
-function apply(d){G.t=d.tm;G.win=d.w;G.items=d.i.map(([w,x,y,th])=>({w,x,y,th}));d.fx.forEach(fxh);const old=new Map(G.ps.map(p=>[p.id,p]));
+function apply(d){G.t=d.tm;G.win=d.w;G.lobby=d.l;G.items=d.i.map(([w,x,y,th])=>({w,x,y,th}));d.fx.forEach(fxh);const old=new Map(G.ps.map(p=>[p.id,p]));
  G.ps=d.p.map(a=>{const[id,x,y,f,dmg,stocks,c,ak,at,ad,inv,ult,rs,gr,hs,dg,name,out,sk,cur]=a,p=old.get(id)||{id};
   return Object.assign(p,{x,y,f,dmg,stocks,c,ak,at,ad,inv,ult,rs,g:gr,hs,dg,name,out,sk,cur})})}
