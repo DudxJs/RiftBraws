@@ -1,196 +1,24 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Rift Brawl</title>
-  <meta name="description" content="Rift Brawl — arena 2D de plataforma fighter inspirada em Brawlhalla" />
-  <link rel="stylesheet" href="css/style.css" />
-  <script src="js/data.js" defer></script>
-  <script src="js/ui.js" defer></script>
-  <script src="js/game.js" defer></script>
-</head>
-<body>
-  <div class="app-shell">
-    <canvas id="background-canvas"></canvas>
-
-    <div id="game-overlay" class="hidden" aria-live="polite">
-      <div class="game-header">
-        <div class="hud-left">
-          <div class="health-wrap">
-            <span>Jogador</span>
-            <div class="health-bar"><i id="player-health-fill"></i></div>
-          </div>
-          <div class="health-wrap">
-            <span>Bot</span>
-            <div class="health-bar enemy"><i id="bot-health-fill"></i></div>
-          </div>
-        </div>
-        <div class="hud-right">
-          <button id="exit-game" type="button">Sair</button>
-        </div>
-      </div>
-      <canvas id="game-canvas" width="1280" height="720"></canvas>
-      <div id="game-message" class="game-message hidden"></div>
-    </div>
-
-    <header class="topbar">
-      <div class="brand-wrap">
-        <div class="brand-mark">RB</div>
-        <div class="brand-text">
-          <span class="mini">Platform Fighter</span>
-          <strong>RIFT BRAWL</strong>
-        </div>
-      </div>
-
-      <nav class="main-nav" id="main-nav" aria-label="Navegação principal"></nav>
-
-      <button class="config-button" id="open-config" type="button">Config</button>
-    </header>
-
-    <main class="page-content">
-      <section class="page active" id="page-home">
-        <div class="hero-panel">
-          <div class="hero-copy">
-            <p class="eyebrow">Arena PvP local · sem servidor</p>
-            <h1>RIFT BRAWL</h1>
-            <p class="subtitle">Platform fighter online · até 4 jogadores · partidas locais e rápidas</p>
-          </div>
-
-          <div class="hero-card">
-            <div id="summary"></div>
-
-            <label class="field">
-              <span>Seu nome</span>
-              <input id="player-name" maxlength="10" placeholder="Seu nome" />
-            </label>
-
-            <div class="buttons-row">
-              <button class="primary" id="btn-train" type="button">Treino vs Bot</button>
-              <button class="secondary" id="btn-lobby" type="button">Criar sala</button>
-            </div>
-
-            <div class="join-row">
-              <input id="room-code" maxlength="5" placeholder="CÓDIGO" />
-              <button class="primary" id="btn-join" type="button">Entrar na sala</button>
-            </div>
-
-            <small id="status-message"></small>
-          </div>
-        </div>
-      </section>
-
-      <section class="page" id="page-legends">
-        <div class="section-header">
-          <div>
-            <p class="eyebrow">Seleção</p>
-            <h2>Lendas</h2>
-          </div>
-        </div>
-        <div class="cards-grid" id="legend-grid"></div>
-      </section>
-
-      <section class="page" id="page-weapons">
-        <div class="section-header">
-          <div>
-            <p class="eyebrow">Arsenal</p>
-            <h2>Armas</h2>
-          </div>
-        </div>
-        <div class="cards-grid" id="weapon-grid"></div>
-      </section>
-
-      <section class="page" id="page-skins">
-        <div class="section-header">
-          <div>
-            <p class="eyebrow">Customização</p>
-            <h2>Skins</h2>
-          </div>
-        </div>
-        <div class="cards-grid" id="skin-grid"></div>
-      </section>
-
-      <section class="page" id="page-maps">
-        <div class="section-header">
-          <div>
-            <p class="eyebrow">Arena</p>
-            <h2>Mapas</h2>
-          </div>
-        </div>
-        <div class="cards-grid" id="map-grid"></div>
-      </section>
-
-      <section class="page" id="page-help">
-        <div class="section-header">
-          <div>
-            <p class="eyebrow">Como jogar</p>
-            <h2>Controles</h2>
-          </div>
-        </div>
-
-        <div class="info-panel">
-          <p><strong>Mover:</strong> A / D ou setas</p>
-          <p><strong>Pular:</strong> W / Espaço</p>
-          <p><strong>Descer plataforma / queda rápida:</strong> S</p>
-          <p><strong>Leve:</strong> J / Z</p>
-          <p><strong>Pesado:</strong> K / X</p>
-          <p><strong>Esquiva:</strong> L / C</p>
-          <p><strong>Trocar arma:</strong> Q / B</p>
-          <p><strong>Ultimate:</strong> I / V</p>
-          <p><strong>Sair da partida:</strong> Esc</p>
-          <p><strong>Geral:</strong> agarre as bordas ao cair, cada golpe aumenta o % e o dano do knockback.</p>
-        </div>
-      </section>
-    </main>
-
-    <footer class="site-footer">
-      <span>By: Eduardo (@dudx._js)</span>
-    </footer>
-  </div>
-
-  <div class="modal hidden" id="config-modal">
-    <div class="modal-card">
-      <div class="modal-header">
-        <h3>Configurações</h3>
-        <button class="icon-button" id="close-config" type="button">✕</button>
-      </div>
-
-      <div class="settings">
-        <label class="field">
-          <span>Nome do jogador</span>
-          <input id="settings-name" maxlength="10" />
-        </label>
-
-        <label class="field">
-          <span>Qualidade gráfica</span>
-          <select id="graphics-quality">
-            <option value="low">Baixa</option>
-            <option value="medium" selected>Média</option>
-            <option value="high">Alta</option>
-          </select>
-        </label>
-
-        <label class="field checkbox-row">
-          <input type="checkbox" id="fullscreen-toggle" />
-          <span>Modo tela cheia</span>
-        </label>
-
-        <label class="field checkbox-row">
-          <input type="checkbox" id="sound-toggle" checked />
-          <span>Efeitos sonoros</span>
-        </label>
-
-        <label class="field checkbox-row">
-          <input type="checkbox" id="vibration-toggle" checked />
-          <span>Vibração</span>
-        </label>
-
-        <div class="buttons-row">
-          <button class="secondary" id="reset-settings" type="button">Resetar</button>
-          <button class="primary" id="save-settings" type="button">Salvar</button>
-        </div>
-      </div>
-    </div>
-  </div>
-</body>
-</html>
+<!DOCTYPE html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Rift Brawl</title><link rel="stylesheet" href="css/style.css"></head><body>
+<canvas id="c"></canvas>
+<div id="ui"><h1>RIFT BRAWL</h1>
+<nav><button data-p="home">Jogar</button><button data-p="legends">Lendas</button><button data-p="skins">Skins</button><button data-p="weapons">Armas</button><button data-p="settings">Config</button><button data-p="credits">Créditos</button></nav>
+<section id="home"><b id="sm"></b>
+<div><button id="bb">Treino vs Bot</button> <button id="bh">Criar sala</button></div>
+<div><input id="co" placeholder="CÓDIGO" maxlength="5" style="text-transform:uppercase;width:130px;text-align:center"> <button id="bj">Entrar na sala</button></div>
+<small id="ss"></small>
+<small>WASD/Setas mover · W/Espaço pular (2x) · S descer/queda rápida · J leve · K pesado (W = cima, S no ar = baixo) · L esquiva · I ultimate<br>E pegar arma / arremessar · Q trocar de arma · Esc sai da partida<br>Você começa <b>desarmado</b>: armas caem do céu e cada lenda só usa as suas 2 armas.</small></section>
+<section id="legends" hidden><canvas class="pv" width="220" height="220"></canvas><div class="grid" id="lg"></div></section>
+<section id="skins" hidden><canvas class="pv" width="220" height="220"></canvas><div id="sk" style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center"></div><small>Quer texturas próprias? Veja assets/skins/README.md</small></section>
+<section id="weapons" hidden><table id="wt"></table></section>
+<section id="settings" hidden>
+<label>Nome <input id="cfName" maxlength="10"></label>
+<label>Vidas <select id="cfSt"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select></label>
+<label>Tremor de tela <input id="cfSh" type="checkbox"></label><label>Partículas <input id="cfPa" type="checkbox"></label>
+<label>Sons <input id="cfSn" type="checkbox"></label><label>Volume <input id="cfVo" type="range" min="0" max="1" step=".05"></label>
+<label>Mostrar FPS <input id="cfFp" type="checkbox"></label><small>Vidas valem para quem cria a sala. Tudo é salvo no navegador.</small></section>
+<section id="credits" hidden><h2>Créditos</h2><p>Por: <b>Eduardo (@dudx._js)</b></p><small>Projeto de fã inspirado no gênero platform fighter. Todos os personagens, nomes e artes são originais e o jogo não é afiliado ao Brawlhalla, Ubisoft ou Blue Mountain.</small></section>
+<footer>Por: Eduardo (@dudx._js)</footer></div>
+<script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<script src="js/data.js"></script><script src="js/state.js"></script><script src="js/game.js"></script><script src="js/net.js"></script><script src="js/render.js"></script><script src="js/ui.js"></script>
+</body></html>

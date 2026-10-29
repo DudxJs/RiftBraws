@@ -1,408 +1,83 @@
-const arena = {
-  width: 1280,
-  height: 720,
-  gravity: 1800,
-  floorY: 640,
-  lastTime: 0,
-  running: false,
-  winner: null,
-  started: false
-};
-
-const keys = {};
-const platforms = [
-  { x: 0, y: 660, w: 1280, h: 60 },
-  { x: 180, y: 540, w: 220, h: 18 },
-  { x: 540, y: 470, w: 220, h: 18 },
-  { x: 860, y: 540, w: 220, h: 18 }
-];
-
-function createFighter({ x, y, color, name, facing = 1, isBot = false }) {
-  return {
-    name,
-    x,
-    y,
-    w: 44,
-    h: 58,
-    vx: 0,
-    vy: 0,
-    speed: 360,
-    jumpPower: 700,
-    color,
-    facing,
-    onGround: false,
-    health: 100,
-    attackCooldown: 0,
-    attackTimer: 0,
-    heavyCooldown: 0,
-    isBot,
-    hitFlash: 0
-  };
-}
-
-const player = createFighter({ x: 180, y: 560, color: '#7fe7a8', name: 'Jogador', facing: 1 });
-const bot = createFighter({ x: 990, y: 560, color: '#ff8d70', name: 'Bot', facing: -1, isBot: true });
-
-function setCanvasSize() {
-  const canvas = document.getElementById('game-canvas');
-  if (!canvas) return;
-
-  const ratio = 1280 / 720;
-  const availableWidth = window.innerWidth - 40;
-  const availableHeight = window.innerHeight - 140;
-  const width = Math.min(availableWidth, availableHeight * ratio);
-  const height = width / ratio;
-
-  canvas.width = 1280;
-  canvas.height = 720;
-  canvas.style.width = `${width}px`;
-  canvas.style.height = `${height}px`;
-}
-
-function clamp(value, min, max) {
-  return Math.min(Math.max(value, min), max);
-}
-
-function rectsIntersect(a, b) {
-  return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
-}
-
-function getAttackBox(fighter) {
-  const direction = fighter.facing;
-  return {
-    x: fighter.x + (direction > 0 ? fighter.w : -60),
-    y: fighter.y + 8,
-    w: 60,
-    h: 42
-  };
-}
-
-function updateHud() {
-  const playerFill = document.getElementById('player-health-fill');
-  const botFill = document.getElementById('bot-health-fill');
-  if (playerFill) playerFill.style.width = `${player.health}%`;
-  if (botFill) botFill.style.width = `${bot.health}%`;
-}
-
-function setMessage(text) {
-  const el = document.getElementById('game-message');
-  if (!el) return;
-  if (!text) {
-    el.classList.add('hidden');
-    el.textContent = '';
-    return;
-  }
-  el.textContent = text;
-  el.classList.remove('hidden');
-}
-
-function resetStage() {
-  player.x = 190;
-  player.y = 560;
-  player.vx = 0;
-  player.vy = 0;
-  player.health = 100;
-  player.onGround = false;
-  player.attackCooldown = 0;
-  player.attackTimer = 0;
-  player.heavyCooldown = 0;
-  player.facing = 1;
-
-  bot.x = 1040;
-  bot.y = 560;
-  bot.vx = 0;
-  bot.vy = 0;
-  bot.health = 100;
-  bot.onGround = false;
-  bot.attackCooldown = 0;
-  bot.attackTimer = 0;
-  bot.heavyCooldown = 0;
-  bot.facing = -1;
-
-  arena.running = true;
-  arena.started = true;
-  arena.winner = null;
-  updateHud();
-  setMessage('');
-}
-
-function showMainMenu() {
-  const overlay = document.getElementById('game-overlay');
-  if (overlay) overlay.classList.add('hidden');
-
-  document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
-  const home = document.getElementById('page-home');
-  if (home) home.classList.add('active');
-
-  arena.running = false;
-  arena.started = false;
-}
-
-function startGame() {
-  setCanvasSize();
-  resetStage();
-
-  const overlay = document.getElementById('game-overlay');
-  if (overlay) overlay.classList.remove('hidden');
-
-  document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
-  document.querySelectorAll('.main-nav button').forEach(btn => btn.classList.remove('active'));
-}
-
-function stopGame() {
-  showMainMenu();
-}
-
-function attackFighter(attacker, defender, heavy = false) {
-  const attackBox = getAttackBox(attacker);
-  const hitBox = {
-    x: defender.x,
-    y: defender.y,
-    w: defender.w,
-    h: defender.h
-  };
-
-  if (!rectsIntersect(attackBox, hitBox)) return false;
-
-  const damage = heavy ? 18 : 10;
-  const force = heavy ? 780 : 540;
-
-  defender.health = clamp(defender.health - damage, 0, 100);
-  defender.vx = (attacker.x < defender.x ? 1 : -1) * force;
-  defender.vy = -280;
-  defender.hitFlash = 0.12;
-
-  if (defender.health <= 0) {
-    arena.winner = attacker.name;
-    arena.running = false;
-    setMessage(`${attacker.name} venceu! Pressione R para recomeçar.`);
-  }
-
-  return true;
-}
-
-function updateFighter(fighter, dt, controlState, isBot = false) {
-  if (fighter.health <= 0) return;
-
-  fighter.attackCooldown = Math.max(0, fighter.attackCooldown - dt);
-  fighter.heavyCooldown = Math.max(0, fighter.heavyCooldown - dt);
-  fighter.hitFlash = Math.max(0, fighter.hitFlash - dt);
-
-  const moveLeft = !!controlState.left;
-  const moveRight = !!controlState.right;
-  const jump = !!controlState.jump;
-  const attack = !!controlState.attack;
-  const heavy = !!controlState.heavy;
-
-  if (moveLeft) fighter.vx = -fighter.speed;
-  else if (moveRight) fighter.vx = fighter.speed;
-  else fighter.vx *= 0.75;
-
-  if (fighter.vx !== 0) fighter.facing = fighter.vx > 0 ? 1 : -1;
-
-  if (jump && fighter.onGround) {
-    fighter.vy = -fighter.jumpPower;
-    fighter.onGround = false;
-  }
-
-  fighter.vy += arena.gravity * dt;
-  fighter.x += fighter.vx * dt;
-  fighter.y += fighter.vy * dt;
-  fighter.x = clamp(fighter.x, 0, arena.width - fighter.w);
-
-  let grounded = false;
-  for (const platform of platforms) {
-    const prevY = fighter.y - fighter.vy * dt;
-    const abovePlatform = prevY + fighter.h <= platform.y + 10 && fighter.y + fighter.h >= platform.y && fighter.y + fighter.h <= platform.y + 80;
-
-    if (rectsIntersect(fighter, platform)) {
-      if (fighter.vy >= 0 && abovePlatform) {
-        fighter.y = platform.y - fighter.h;
-        fighter.vy = 0;
-        fighter.onGround = true;
-        grounded = true;
-      }
-    }
-  }
-
-  if (!grounded) fighter.onGround = false;
-
-  if (fighter.y > arena.height + 200) {
-    fighter.health = 0;
-    arena.winner = isBot ? 'Jogador' : 'Bot';
-    arena.running = false;
-    setMessage(`${arena.winner} venceu! Pressione R para recomeçar.`);
-  }
-
-  if (attack && fighter.attackCooldown <= 0) {
-    fighter.attackCooldown = 0.32;
-    fighter.attackTimer = 0.16;
-    attackFighter(fighter, isBot ? player : bot, false);
-  }
-
-  if (heavy && fighter.heavyCooldown <= 0) {
-    fighter.heavyCooldown = 0.72;
-    fighter.attackTimer = 0.22;
-    attackFighter(fighter, isBot ? player : bot, true);
-  }
-
-  fighter.attackTimer = Math.max(0, fighter.attackTimer - dt);
-}
-
-function updateBot(dt) {
-  const nextState = { left: false, right: false, jump: false, attack: false, heavy: false };
-  const target = player;
-  const deltaX = target.x - bot.x;
-
-  if (Math.abs(deltaX) > 100) {
-    nextState.right = deltaX > 0;
-    nextState.left = deltaX < 0;
-  }
-
-  if (Math.abs(deltaX) < 90 && bot.onGround && Math.random() < 0.022) {
-    nextState.jump = true;
-  }
-
-  if (Math.abs(deltaX) < 90 && bot.attackCooldown <= 0) {
-    nextState.attack = true;
-  }
-
-  if (Math.abs(deltaX) < 120 && Math.random() < 0.014 && bot.heavyCooldown <= 0) {
-    nextState.heavy = true;
-  }
-
-  updateFighter(bot, dt, nextState, true);
-}
-
-function updatePlayer(dt) {
-  const playerKeyState = {
-    left: !!(keys['KeyA'] || keys['ArrowLeft']),
-    right: !!(keys['KeyD'] || keys['ArrowRight']),
-    jump: !!(keys['KeyW'] || keys['ArrowUp'] || keys['Space']),
-    attack: !!(keys['KeyJ'] || keys['KeyZ']),
-    heavy: !!(keys['KeyK'] || keys['KeyX'])
-  };
-
-  updateFighter(player, dt, playerKeyState, false);
-}
-
-function drawBackground(ctx) {
-  const gradient = ctx.createLinearGradient(0, 0, 0, arena.height);
-  gradient.addColorStop(0, '#0d1d2e');
-  gradient.addColorStop(0.35, '#0b1a2c');
-  gradient.addColorStop(1, '#0a1622');
-  ctx.fillStyle = gradient;
-  ctx.fillRect(0, 0, arena.width, arena.height);
-
-  ctx.fillStyle = 'rgba(255,255,255,0.05)';
-  for (let i = 0; i < 80; i++) {
-    ctx.fillRect((i * 37) % arena.width, (i * 53) % 300, 2, 2);
-  }
-}
-
-function drawPlatform(ctx, platform) {
-  ctx.fillStyle = '#253856';
-  ctx.fillRect(platform.x, platform.y, platform.w, platform.h);
-  ctx.fillStyle = '#7fb3ff';
-  ctx.fillRect(platform.x, platform.y, platform.w, 4);
-}
-
-function drawFighter(ctx, fighter) {
-  ctx.save();
-  if (fighter.hitFlash > 0) {
-    ctx.shadowColor = '#fff';
-    ctx.shadowBlur = 18;
-  }
-
-  ctx.fillStyle = fighter.color;
-  ctx.fillRect(fighter.x, fighter.y + 14, fighter.w, fighter.h - 14);
-  ctx.fillStyle = '#e3ecff';
-  ctx.beginPath();
-  ctx.arc(fighter.x + fighter.w / 2, fighter.y + 14, 10, 0, Math.PI * 2);
-  ctx.fill();
-
-  if (fighter.attackTimer > 0) {
-    const attackBox = getAttackBox(fighter);
-    ctx.strokeStyle = fighter.color;
-    ctx.lineWidth = 3;
-    ctx.strokeRect(attackBox.x, attackBox.y, attackBox.w, attackBox.h);
-  }
-
-  ctx.fillStyle = 'rgba(0,0,0,0.28)';
-  ctx.fillRect(fighter.x - 8, fighter.y - 16, fighter.w + 16, 8);
-
-  const healthRatio = fighter.health / 100;
-  const healthWidth = fighter.w * healthRatio;
-  ctx.fillStyle = '#2dff94';
-  ctx.fillRect(fighter.x, fighter.y - 16, healthWidth, 8);
-  ctx.restore();
-}
-
-function render() {
-  const canvas = document.getElementById('game-canvas');
-  if (!canvas) return;
-  const ctx = canvas.getContext('2d');
-
-  drawBackground(ctx);
-  for (const platform of platforms) drawPlatform(ctx, platform);
-  drawFighter(ctx, player);
-  drawFighter(ctx, bot);
-
-  if (!arena.running && arena.winner) {
-    setMessage(`${arena.winner} venceu! Pressione R para recomeçar.`);
-  }
-}
-
-let animationFrameId = null;
-
-function loop(timestamp) {
-  const delta = Math.min((timestamp - arena.lastTime) / 1000 || 0.016, 0.033);
-  arena.lastTime = timestamp;
-
-  if (arena.running) {
-    updatePlayer(delta);
-    updateBot(delta);
-  }
-
-  render();
-
-  animationFrameId = requestAnimationFrame(loop);
-}
-
-function bindGameControls() {
-  window.addEventListener('keydown', (event) => {
-    keys[event.code] = true;
-    if (event.code === 'KeyR' && !arena.running) {
-      resetStage();
-    }
-    if (event.code === 'Escape') {
-      stopGame();
-    }
-  });
-
-  window.addEventListener('keyup', (event) => {
-    keys[event.code] = false;
-  });
-
-  window.addEventListener('resize', setCanvasSize);
-
-  const exitBtn = document.getElementById('exit-game');
-  if (exitBtn) {
-    exitBtn.addEventListener('click', stopGame);
-  }
-}
-
-function initGame() {
-  setCanvasSize();
-  updateHud();
-  bindGameControls();
-  showMainMenu();
-  render();
-  if (!animationFrameId) {
-    animationFrameId = requestAnimationFrame(loop);
-  }
-}
-
-window.startGame = startGame;
-window.showMainMenu = showMainMenu;
-window.addEventListener('DOMContentLoaded', initGame);
+// SIMULAÇÃO (roda no host): física, combate, armas, drops, bots
+const atk=p=>p.ak==1?(p.cur>=0?WP[p.cur]:UN).L:p.ak==2?(p.cur>=0?WP[p.cur]:UN).H:ULT;
+function hb(p){if(p.ak==3)return{x:p.x,y:p.y-28,r:170,circ:1};
+ const a=atk(p),r=a[6],s=a[7];let x=p.x+p.f*r*.6,y=p.y-30,w=r,h=s;
+ if(p.ad==1){x=p.x;y=p.y-56-r*.45;w=s+20;h=r}else if(p.ad==2){x=p.x;y=p.y+r*.3;w=s+20;h=r}
+ return{x,y,w,h}}
+function pick(p){const w=LG[p.c].w,it=G.items.find(i=>!i.th&&w.includes(i.w)&&Math.abs(i.x-p.x)<46&&Math.abs(i.y-(p.y-20))<56);
+ if(it){G.items.splice(G.items.indexOf(it),1);p.has[w.indexOf(it.w)]=1;p.cur=it.w}
+ else if(p.cur>=0){const k=w.indexOf(p.cur);G.items.push({id:++iid,w:p.cur,x:p.x,y:p.y-30,vx:p.f*13,vy:-2,th:p.id});p.has[k]=0;p.cur=p.has[1-k]?w[1-k]:-1}}
+function itemsTick(){
+ for(const i of G.items){i.vy+=.6;const py=i.y;i.x+=i.vx;i.y+=i.vy;i.vx*=i.th?.995:.9;
+  for(const q of PL)if(i.vy>=0&&py<=q.y+2&&i.y>=q.y&&i.x>q.x&&i.x<q.x+q.w){i.y=q.y;i.vy=0;i.th=0}
+  if(i.th)for(const q of G.ps)if(q.id!=i.th&&!q.out&&q.rs<=0&&q.inv<=0&&Math.abs(q.x-i.x)<28&&Math.abs(q.y-28-i.y)<38){
+   q.dmg+=8;const m=(7+q.dmg*.06)/LG[q.c].wt;q.vx=Math.sign(i.vx)*m;q.vy=-m*.5;q.hs=12;q.ak=0;q.dg=0;q.g=0;fx(['h',q.x,q.y-28,m]);i.th=0;i.vx*=.2;break}
+  if(i.y>900)i.dead=1}
+ G.items=G.items.filter(i=>!i.dead);
+ if(G.t%300==30&&G.items.length<3&&G.ps.length){const ws=G.ps.flatMap(p=>LG[p.c].w);G.items.push({id:++iid,w:ws[Math.random()*ws.length|0],x:350+Math.random()*500,y:-30,vx:0,vy:0,th:0})}}
+function fx(e){if(mode=='h')outq.push(e);fxh(e)}
+function fxh(e){const[k,x,y,m]=e,n=CFG.parts?(k=='h'?8+(m|0):30):0;sfx(k);if(CFG.shake)shake=Math.max(shake,k=='h'?Math.min(m/2,12):16);
+ for(let i=0;i<n;i++){const a=Math.random()*6.28,s=Math.random()*(k=='h'?5:10)+2;parts.push({x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s,l:30,c:k=='h'?'#fff':COLS[m%4]})}}
+function strike(p,a){const b=hb(p);
+ for(const q of G.ps){if(q==p||q.out||q.rs>0||q.inv>0||p.hit.includes(q.id))continue;
+  const qx=q.x,qy=q.y-28,ok=b.circ?Math.hypot(qx-b.x,qy-b.y)<b.r+22:Math.abs(qx-b.x)<b.w/2+18&&Math.abs(qy-b.y)<b.h/2+28;
+  if(!ok)continue;p.hit.push(q.id);q.dmg+=a[3]*(1+(LG[p.c].str-5)*.06);
+  const m=(a[4]+q.dmg*a[5])/LG[q.c].wt,dx=b.circ?(Math.sign(q.x-p.x)||p.f):p.f;
+  if(p.ad==1&&!b.circ){q.vx=dx*m*.3;q.vy=-m*1.1}
+  else if(p.ad==2&&!q.g&&!b.circ){q.vx=dx*m*.3;q.vy=m*.9}
+  else{q.vx=dx*m*.95;q.vy=-m*(b.circ?.7:.5)}
+  q.hs=Math.min(45,8+m*1.5)|0;q.ak=0;q.dg=0;q.g=0;
+  p.ult=Math.min(100,p.ult+a[3]*1.6);q.ult=Math.min(100,q.ult+a[3]);fx(['h',qx,qy,m])}}
+function spawn(p){p.x=350+Math.random()*500;p.y=-60;p.vx=p.vy=0;p.inv=150;p.jumps=2;p.dmg=0}
+function step(p,I,t){const c=LG[p.c],pd=I&~p.pi;p.pi=I;
+ if(p.rs>0){if(--p.rs==0&&!p.out)spawn(p);return}
+ if(p.out)return;
+ const D=I&8,dir=(I&2?1:0)-(I&1?1:0);
+ ['inv','cd','hs','dt'].forEach(k=>p[k]>0&&p[k]--);
+ const free=p.hs<=0&&!p.ak&&!p.dg;
+ if(free&&dir)p.f=dir;
+ if(free&&p.cd<=0&&pd&128){p.dg=14;p.inv=16;p.cd=70-c.dex*3;p.vx=(dir||p.f)*11;p.vy=0}
+ else if(free){
+  if(pd&96){p.ak=pd&32?1:2;p.at=0;p.ad=I&4?1:(D&&!p.g?2:0);p.hit=[]}
+  else if(pd&256&&p.ult>=100){p.ak=3;p.at=0;p.ad=0;p.hit=[];p.ult=0}
+  if(pd&16&&p.jumps>0){p.vy=-c.jp;p.jumps--;p.g=0}
+  if(pd&1024&&p.has[0]&&p.has[1])p.cur=p.cur==c.w[0]?c.w[1]:c.w[0];
+  if(pd&512)pick(p)}
+ if(p.dg){p.vy=0;p.vx*=.88;p.dg--}
+ else if(p.hs>0)p.vx*=.985;
+ else if(p.ak){const a=atk(p);p.at++;
+  if(p.ak==2&&p.at==a[1])p.vx+=p.f*3;
+  p.vx*=p.g?.8:.97;
+  if(p.ak==3&&p.at<a[1])p.inv=2;
+  if(p.at>=a[1]&&p.at<=a[2])strike(p,a);
+  if(p.at>=a[0])p.ak=0}
+ else p.vx+=(dir*c.sp-p.vx)*(p.g?.25:.09);
+ if(!p.dg){const st=storm(t);p.vy+=st?.45:.85;if(D&&p.vy>0&&p.hs<=0)p.vy+=.6;if(p.hs<=0)p.vy=Math.min(p.vy,st?9:17)}
+ if(pd&8&&p.pl&&p.pl.s)p.dt=14;
+ p.x+=p.vx;const py=p.y;p.y+=p.vy;p.g=0;p.pl=null;
+ if(p.vy>=0)for(const q of PL){if(q.s&&p.dt>0)continue;
+  if(py<=q.y+2&&p.y>=q.y&&p.x+14>q.x&&p.x-14<q.x+q.w){p.y=q.y;p.vy=0;p.g=1;p.jumps=2;p.pl=q;p.x+=q.dx||0;break}}
+ if(p.x<-250||p.x>1450||p.y>900||p.y<-450){
+  fx(['k',Math.max(30,Math.min(1170,p.x)),Math.max(30,Math.min(670,p.y)),p.c]);
+  p.stocks--;p.rs=90;p.vx=p.vy=0;p.ak=0;p.hs=0;if(p.stocks<=0)p.out=1}}
+function ai(p){const o=G.ps.filter(q=>q!=p&&!q.out&&q.rs<=0).sort((a,b)=>Math.abs(a.x-p.x)-Math.abs(b.x-p.x))[0];
+ if(p.rs>0||!o)return 0;let I=0;const dx=o.x-p.x,dy=o.y-p.y,r=Math.random();
+ if(p.x<260||p.x>940||p.y>540){I|=p.x<600?2:1;if(p.y>400&&p.vy>0||r<.03)I|=16;return I}
+ if(p.cur<0){const it=G.items.find(i=>!i.th&&LG[p.c].w.includes(i.w));if(it){const d=it.x-p.x;if(Math.abs(d)>20)I|=d>0?2:1;else I|=512;if(it.y<p.y-60&&r<.05)I|=16;return I}}
+ if(Math.abs(dx)>70)I|=dx>0?2:1;
+ if(dy<-80&&r<.05)I|=16|4;
+ if(Math.abs(dx)<130&&Math.abs(dy)<90&&r<.1)I|=r<.05?32:64;
+ if(p.ult>=100&&Math.abs(dx)<150)I|=256;
+ if(o.ak&&Math.abs(dx)<120&&r<.1)I|=128;
+ return I}
+function reset(){G.ps.forEach(p=>{p.stocks=CFG.stocks;p.cur=-1;p.has=[0,0];p.dmg=0;p.ult=0;p.out=0;p.rs=40;p.ak=0;p.hs=0;p.dg=0});G.win=null;G.items=[]}
+function tick(){G.t++;PL=plats(G.t);itemsTick();
+ for(const p of G.ps){let I;if(p.id==me)I=getInput();else if(p.bot)I=ai(p);else{I=p.raw|p.press;p.press=0}step(p,I,G.t)}
+ const al=G.ps.filter(p=>!p.out);
+ if(!G.win&&G.ps.length>1&&al.length<=1){G.win=al[0]?al[0].name:'Empate';G.wt=200}
+ if(G.win&&--G.wt<=0)reset();
+ if(mode=='h'&&G.t%2==0){const s={t:'s',tm:G.t,w:G.win,i:G.items.map(i=>[i.w,i.x,i.y,i.th?1:0]),fx:outq.splice(0),p:G.ps.map(p=>[p.id,p.x,p.y,p.f,p.dmg|0,p.stocks,p.c,p.ak,p.at,p.ad,p.inv,p.ult|0,p.rs,p.g,p.hs,p.dg,p.name,p.out,p.sk,p.cur])};
+  Object.values(conns).forEach(c=>c.open&&c.send(s))}}
+function apply(d){G.t=d.tm;G.win=d.w;G.items=d.i.map(([w,x,y,th])=>({w,x,y,th}));d.fx.forEach(fxh);const old=new Map(G.ps.map(p=>[p.id,p]));
+ G.ps=d.p.map(a=>{const[id,x,y,f,dmg,stocks,c,ak,at,ad,inv,ult,rs,gr,hs,dg,name,out,sk,cur]=a,p=old.get(id)||{id};
+  return Object.assign(p,{x,y,f,dmg,stocks,c,ak,at,ad,inv,ult,rs,g:gr,hs,dg,name,out,sk,cur})})}
