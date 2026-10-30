@@ -1,5 +1,4 @@
 // SIMULAÇÃO (roda no host): física, combate, armas, drops, bots
-const atk=p=>p.ak==1?(p.cur>=0?WP[p.cur]:UN).L:p.ak==2?(p.cur>=0?WP[p.cur]:UN).H:ULT;
 function hb(p){if(p.ak==3)return{x:p.x,y:p.y-28,r:170,circ:1};
  const a=atk(p),r=a[6],s=a[7];let x=p.x+p.f*r*.6,y=p.y-30,w=r,h=s;
  if(p.ad==1){x=p.x;y=p.y-56-r*.45;w=s+20;h=r}else if(p.ad==2){x=p.x;y=p.y+r*.3;w=s+20;h=r}

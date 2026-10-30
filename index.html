@@ -2,9 +2,8 @@
 <title>Rift Brawl</title>
 <script>function fail(t){const d=document.createElement('pre');d.style.cssText='color:#fff;background:#a00;margin:0;padding:8px;white-space:pre-wrap;font-size:13px;position:relative;z-index:99';d.textContent=t;(document.body||document.documentElement).prepend(d)}onerror=(m,u,l)=>fail('Erro: '+m+' ('+String(u).split('/').pop()+':'+l+')')</script>
 <link href="https://fonts.googleapis.com/css2?family=Russo+One&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=4" onerror="fail('Não carregou '+this.href+' — mantenha as pastas css/ e js/ no repositório')">
+<link rel="stylesheet" href="css/style.css?v=5" onerror="fail('Não carregou '+this.href+' — mantenha as pastas css/ e js/ no repositório')">
 </head><body>
-<div id="rot">Gire o celular para horizontal</div><canvas id="c"></canvas>
 <div id="ui"><canvas id="bg"></canvas>
 <header><div class="logo">RIFT<b>BRAWL</b></div><div id="chip"></div><button id="mu" class="ic" title="Música">♪</button></header>
 <main>
@@ -12,12 +11,6 @@
 <div class="hero panel"><canvas id="hero" width="320" height="320"></canvas><h2 id="hn"></h2><small id="hr"></small><div id="hb"></div><button class="big" data-a="go:legends"><i>🔄</i><span><b>TROCAR LENDA</b></span></button><small id="tip"></small></div></section>
 <section id="s-train" class="scr" hidden></section><section id="s-room" class="scr" hidden></section><section id="s-legends" class="scr" hidden></section><section id="s-skins" class="scr" hidden></section>
 <section id="s-weapons" class="scr" hidden></section><section id="s-settings" class="scr" hidden></section><section id="s-credits" class="scr" hidden></section>
-</main><footer>Por: Eduardo (@dudx._js) · v4</footer></div>
-<div id="lobby" hidden><div class="lbx panel"><small>SALA DE ESPERA</small><div id="lcode"></div>
-<div class="lrow"><button id="lcp">📋 Copiar código</button><button id="lln">🔗 Copiar link</button></div>
-<div id="slots"></div><p id="lmsg"></p>
-<div class="lrow"><label>Vidas <select id="lst"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select></label><button id="lbot">+ Bot</button><button id="lgo" class="big go"><i>⚔</i><span><b>INICIAR PARTIDA</b></span></button></div>
-<button class="back" id="lex">✖ Sair da sala</button></div></div>
-<script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js"></script>
-<script src="js/data.js?v=4" onerror="fail('Não carregou js/data.js — mantenha as pastas')"></script><script src="js/state.js?v=4"></script><script src="js/audio.js?v=4"></script><script src="js/game.js?v=4"></script><script src="js/net.js?v=4"></script><script src="js/render.js?v=4"></script><script src="js/ui.js?v=4"></script>
+</main><footer>Por: Eduardo (@dudx._js) · v5</footer></div>
+<script src="js/data.js" onerror="fail('Não carregou js/data.js — mantenha as pastas')"></script><script src="js/state.js"></script><script src="js/audio.js"></script><script src="js/chars.js"></script><script src="js/ui.js"></script>
 </body></html>

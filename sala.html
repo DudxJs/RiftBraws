@@ -1,0 +1,16 @@
+<!DOCTYPE html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Rift Brawl · Sala de Batalha</title>
+<script>function fail(t){const d=document.createElement('pre');d.style.cssText='color:#fff;background:#a00;margin:0;padding:8px;white-space:pre-wrap;font-size:13px;position:relative;z-index:99';d.textContent=t;(document.body||document.documentElement).prepend(d)}onerror=(m,u,l)=>fail('Erro: '+m+' ('+String(u).split('/').pop()+':'+l+')')</script>
+<link href="https://fonts.googleapis.com/css2?family=Russo+One&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css?v=5" onerror="fail('Não carregou '+this.href+' — mantenha as pastas css/ e js/ no repositório')">
+</head><body>
+<div id="rot">Gire o celular para horizontal</div><canvas id="c"></canvas>
+<div id="conn" class="panel"><h2 id="ss">Conectando...</h2><a class="back" href="index.html">◀ Voltar ao menu</a></div>
+<div id="lobby" hidden><div class="lbx panel"><small>SALA DE ESPERA</small><div id="lcode"></div>
+<div class="lrow"><button id="lcp">📋 Copiar código</button><button id="lln">🔗 Copiar link</button></div>
+<div id="slots"></div><p id="lmsg"></p>
+<div class="lrow"><label>Vidas <select id="lst"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select></label><button id="lbot">+ Bot</button><button id="lgo" class="big go"><i>⚔</i><span><b>INICIAR PARTIDA</b></span></button></div>
+<button class="back" id="lex">✖ Sair da sala</button></div></div>
+<script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<script src="js/data.js?v=5"></script><script src="js/state.js?v=5"></script><script src="js/audio.js?v=5"></script><script src="js/chars.js?v=5"></script><script src="js/game.js?v=5"></script><script src="js/net.js?v=5"></script><script src="js/render.js?v=5"></script><script src="js/room.js?v=5"></script>
+</body></html>

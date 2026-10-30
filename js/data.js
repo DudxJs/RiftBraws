@@ -33,3 +33,4 @@ const SK=[{n:'Clássico',a:null,b:'#ffffff44',pat:'solid'},{n:'Tigre',a:'#ff9f1c
 const COLS=['#4cc9f0','#f72585','#ffd166','#06d6a0'];
 const plats=t=>[{x:300,w:600,y:480},{x:370,w:190,y:350,s:1},{x:640,w:190,y:350,s:1},{x:520+Math.sin(t/80)*170,w:160,y:215,s:1,dx:Math.cos(t/80)*170/80}];
 const storm=t=>t%1800>1300;
+const atk=p=>p.ak==1?(p.cur>=0?WP[p.cur]:UN).L:p.ak==2?(p.cur>=0?WP[p.cur]:UN).H:ULT;

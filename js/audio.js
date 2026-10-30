@@ -12,3 +12,5 @@ const AU={c:null,iv:0,n:0,
   this.iv=setInterval(()=>{if(!CFG.mus)return;const i=this.n++,b=B[i>>3&3];this.t(220*2**((S[i%8]+b)/12),.2,'square',.25,0,1);if(i%4==0)this.t(55*2**(b/12),.5,'sawtooth',.5,0,1)},240)}};
 ['pointerdown','keydown'].forEach(e=>addEventListener(e,()=>AU.start(),{once:true}));
 function sfx(k){AU.sfx(k)}
+document.addEventListener('click',e=>{const b=e.target.closest('button,.tile,a.back');if(b)AU.sfx(b.closest('.back')?'back':'click')});
+document.addEventListener('pointerover',e=>{const b=e.target.closest('button,.tile');if(b&&!b.contains(e.relatedTarget))AU.sfx('hover')});

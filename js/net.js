@@ -15,7 +15,7 @@ function joinRoom(k){k=k.trim().toUpperCase();code=k;if(!k)return say('Digite o 
  say('Conectando...');peer=new Peer();peer.on('error',e=>say('Erro: '+e.type));
  peer.on('open',()=>{conn=peer.connect('rb'+k,{reliable:true});
   conn.on('open',()=>{conn.send({t:'h',n:nm(),c:CFG.legend,s:CFG.skin});mode='gst';G.lobby=1;begin()});
-  conn.on('data',d=>{if(d.t=='w')me=d.id;else if(d.t=='s')apply(d);else if(d.t=='full'){say('Sala cheia');location.reload()}});
-  conn.on('close',()=>{alert('Conexão com o host perdida');location.reload()})})}
+  conn.on('data',d=>{if(d.t=='w')me=d.id;else if(d.t=='s')apply(d);else if(d.t=='full'){say('Sala cheia. Voltando ao menu...');setTimeout(()=>location.href='index.html',2500)}});
+  conn.on('close',()=>{alert('Conexão com o host perdida');location.href='index.html'})})}
 function startMatch(){G.lobby=0;G.win=null;G.ps.forEach(p=>p.rs=30);fx(['s',0,0,'ok'])}
 function addBot(){if(G.ps.length>=4)return;const b=newP('Bot',Math.random()*LG.length|0,1);b.sk=Math.random()*SK.length|0;G.ps.push(b)}
