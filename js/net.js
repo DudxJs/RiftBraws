@@ -1,7 +1,7 @@
 // REDE (WebRTC via PeerJS): host autoritativo, convidados enviam input
 function begin(){G.items=[];iid=0}
 const say=s=>$('ss').textContent=s;
-function startLocal(){mode='l';G.lobby=0;nid=0;const a=newP(nm(),CFG.legend);a.sk=CFG.skin;me=a.id;const b=newP('Bot',Math.random()*LG.length|0,1);b.sk=Math.random()*SK.length|0;G.ps=[a,b];begin()}
+function startLocal(){mode='l';G.lobby=0;nid=0;const a=newP(nm(),CFG.legend);a.sk=CFG.skin;me=a.id;G.ps=[a];for(let i=0;i<CFG.bots;i++){const b=newP('Bot'+(i+1),Math.random()*LG.length|0,1);b.sk=Math.random()*SK.length|0;G.ps.push(b)}begin()}
 function hostRoom(){code=[...Array(5)].map(()=>'ABCDEFGHJKMNPQRSTUVWXYZ23456789'[Math.random()*31|0]).join('');
  say('Criando sala...');peer=new Peer('rb'+code);
  peer.on('error',e=>e.type=='unavailable-id'?hostRoom():say('Erro: '+e.type+' (tente de novo)'));

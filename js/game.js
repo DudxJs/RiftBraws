@@ -66,7 +66,7 @@ function ai(p){const o=G.ps.filter(q=>q!=p&&!q.out&&q.rs<=0).sort((a,b)=>Math.ab
  if(p.cur<0){const it=G.items.find(i=>!i.th&&LG[p.c].w.includes(i.w)&&i.y>p.y-110&&i.y<p.y+60);if(it){const d=it.x-p.x;if(Math.abs(d)>20)I|=d>0?2:1;else I|=512;if(it.y<p.y-60&&r<.05)I|=16;return I}}
  if(Math.abs(dx)>70)I|=dx>0?2:1;
  if(dy<-80&&r<.05)I|=16|4;
- if(Math.abs(dx)<130&&Math.abs(dy)<90&&r<.1)I|=r<.05?32:64;
+ if(Math.abs(dx)<130&&Math.abs(dy)<90&&r<[.04,.1,.2][CFG.diff])I|=Math.random()<.5?32:64;
  if(p.ult>=100&&Math.abs(dx)<150)I|=256;
  if(o.ak&&Math.abs(dx)<120&&r<.1)I|=128;
  return I}

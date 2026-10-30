@@ -2,7 +2,7 @@
 const $=i=>document.getElementById(i);
 const W=1200,H=700,cv=$('c'),g=cv.getContext('2d');cv.width=W;cv.height=H;
 let G={t:0,ps:[],items:[],win:null,wt:0},PL=plats(0),mode='',me=0,nid=0,iid=0,conns={},outq=[],parts=[],shake=0,peer,conn,keys={},code='';
-const CFG=Object.assign({name:'',stocks:3,shake:1,parts:1,snd:1,vol:.5,mus:1,mv:.35,fps:0,legend:0,skin:0},JSON.parse(localStorage.getItem('rb_cfg')||'{}'));
+const CFG=Object.assign({name:'',bots:1,diff:1,stocks:3,shake:1,parts:1,snd:1,vol:.5,mus:1,mv:.35,fps:0,legend:0,skin:0},JSON.parse(localStorage.getItem('rb_cfg')||'{}'));
 const save=()=>localStorage.setItem('rb_cfg',JSON.stringify(CFG));
 const nm=()=>CFG.name.trim()||'Jogador'+(1+Math.random()*99|0);
 function newP(name,c,bot){return{id:++nid,name,c,bot,sk:0,cur:-1,has:[0,0],x:600,y:-60,vx:0,vy:0,f:1,dmg:0,stocks:CFG.stocks,ult:0,ak:0,at:0,ad:0,hit:[],hs:0,dg:0,inv:0,cd:0,dt:0,jumps:2,g:0,rs:30,out:0,pi:0,raw:0,press:0}}
