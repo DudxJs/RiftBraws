@@ -21,7 +21,7 @@ function drawWp(c,k){const w=WP[k],L=w.v;c.strokeStyle=c.fillStyle=w.k;c.lineCap
 function limb(c,x,y,a1,l1,a2,l2,w,col){const kx=x+Math.sin(a1)*l1,ky=y+Math.cos(a1)*l1,ex=kx+Math.sin(a2)*l2,ey=ky+Math.cos(a2)*l2;c.lineCap=c.lineJoin='round';
  [['#000b',w+4],[col,w]].forEach(([s,lw])=>{c.strokeStyle=s;c.lineWidth=lw;c.beginPath();c.moveTo(x,y);c.lineTo(kx,ky);c.lineTo(ex,ey);c.stroke()});return[ex,ey]}
 // Boneco articulado: pernas com joelho, braços, capa/cachecol com vento, cabelo/elmo por lenda, ciclo de corrida, pulo, ataque
-function drawChar(c,p,x,y,vx,vy){const L=LG[p.c],T=performance.now()/1000,run=p.g&&Math.abs(vx)>.8,ph=T*14,air=!p.g;
+function drawChar0(c,p,x,y,vx,vy){const L=LG[p.c],T=performance.now()/1000,run=p.g&&Math.abs(vx)>.8,ph=T*14,air=!p.g;
  if(!p._g&&p.g)p.sq=7;p._g=p.g;if(p.sq>0)p.sq--;
  const sy=1+(p.g?-(p.sq||0)*.02:Math.min(.15,Math.abs(vy)*.01)),sx=2-sy,bob=p.g&&!run?Math.sin(T*3)*1.5:run?Math.abs(Math.sin(ph))*-2:0,tr=Math.max(-16,Math.min(16,-vx*p.f*3));
  c.save();c.translate(x,y);c.scale(p.f*sx,sy);if(p.hs>0)c.rotate(-.25);
@@ -61,3 +61,43 @@ const PVO={};
 function put(cv,key,c,sk,k,t){const x=cv.getContext('2d'),p=PVO[key]||(PVO[key]={f:1,ak:0,at:0,ad:0,g:1,hs:0,dg:0,inv:0});p.c=c;p.sk=sk;p.cur=LG[c].w[0];let vx=0;p.ak=0;
  if(t!=null){const ph=(t/1000)%4.5;if(ph<1.5)vx=3;else if(ph>3){p.ak=ph>3.8?2:1;p.at=Math.floor(((ph-3)%.75)*30)}}
  x.clearRect(0,0,cv.width,cv.height);x.save();x.scale(k,k);drawChar(x,p,cv.width/2/k,cv.height*.9/k,vx,0);x.restore()}
+
+// ---- PERSONAGENS COM ARTE: peças PNG (assets/legends) em esqueleto animado; sem as imagens usa o boneco desenhado em código ----
+const RIGIMG={},TINT={};
+function rigLoad(){LG.forEach((l,i)=>{const r=RIG[l.n.toLowerCase()],I=RIGIMG[i]={},ks=Object.keys(r);let n=0;
+ ks.forEach(k=>{const im=new Image();im.onload=()=>{if(++n==ks.length)I.ok=1};im.src=(typeof RIGSRC!='undefined'&&RIGSRC[r[k].f])||'assets/legends/'+r[k].f;I[k]=im})})}
+function rigPart(c,k,sk){const key=c+k+sk;if(TINT[key])return TINT[key];const im=RIGIMG[c][k],o=document.createElement('canvas');o.width=im.width;o.height=im.height;
+ const x=o.getContext('2d'),f=SK[sk].f;if(f&&'filter' in x)x.filter=f;x.drawImage(im,0,0);return TINT[key]=o}
+function angAt(p,u){const s=p.ad==1?[-.6,-2.6]:p.ad==2?[.6,2.2]:[-1.5,1.1];return p.ak==3?-1.2-u*5:s[0]+(s[1]-s[0])*Math.min(1,u*1.6)}
+function drawRig(c,p,x,y,vx,vy){const L=LG[p.c],r=RIG[L.n.toLowerCase()],T=performance.now()/1000,run=p.g&&Math.abs(vx)>.8,ph=T*14,air=!p.g,K=.32;
+ if(!p._g&&p.g){p.sq=7;if(CFG.parts&&p.rx!=null)for(let i=0;i<5;i++)parts.push({x:p.rx+(Math.random()-.5)*20,y:p.ry,vx:(Math.random()-.5)*3,vy:-Math.random()*2,l:20,c:'#ccd'})}
+ p._g=p.g;if(p.sq>0)p.sq--;
+ const sy=1+(p.g?-(p.sq||0)*.02:Math.min(.15,Math.abs(vy)*.01)),sx=2-sy,bob=run?-Math.abs(Math.sin(ph))*12:p.g?Math.sin(T*3)*3:0,tr=Math.max(-.5,Math.min(.5,-vx*p.f*.12)),P=k=>rigPart(p.c,k,p.sk);
+ const D=(k,rot,oy)=>{const d=r[k];c.save();c.translate(d.ax,d.ay+oy);c.rotate(rot);c.drawImage(P(k),-d.px,-d.py);c.restore()};
+ const LB=(k,a1,a2,oy,fn)=>{const d=r[k],o=P(k),ky=d.h*.5;c.save();c.translate(d.ax,d.ay+oy);c.rotate(a1);c.drawImage(o,0,0,d.w,ky+3,-d.px,-d.py,d.w,ky+3);
+  c.translate(0,ky-d.py);c.rotate(a2);c.drawImage(o,0,ky,d.w,d.h-ky,-d.px,0,d.w,d.h-ky);if(fn)fn(d,ky);c.restore()};
+ c.save();c.translate(x,y);c.scale(p.f*sx*K,sy*K);if(p.hs>0)c.rotate(-.25);
+ c.globalAlpha=p.dg?.35:p.inv>0&&p.inv%6<3?.45:1;if(p.hs>0&&'filter' in c)c.filter='brightness(2) saturate(.3)';
+ if(p.ult>=100&&!p.ak){const q=1+Math.sin(T*6)*.1,gr=c.createRadialGradient(0,-10,5,0,-10,110*q);gr.addColorStop(0,'#ffd16688');gr.addColorStop(1,'#ffd16600');c.fillStyle=gr;c.fillRect(-130,-130,260,150)}
+ if(p.dg){c.fillStyle=L.col+'55';c.fillRect(-170,-250,90,250)}
+ let F1,F2,B1,B2;
+ if(air){F1=vy<0?-.6:-.2;F2=vy<0?.8:.3;B1=vy<0?.35:.1;B2=.6}
+ else if(run){F1=-Math.sin(ph)*.75;F2=Math.max(0,Math.sin(ph-1))*.9+.05;B1=Math.sin(ph)*.75;B2=Math.max(0,-Math.sin(ph-1))*.9+.05}
+ else if(p.ak){F1=-.35;F2=.1;B1=.4;B2=.1}else{F1=-.04;F2=.04;B1=.05;B2=.03}
+ const aB=run?Math.sin(ph)*.8:.08+Math.sin(T*3)*.03;let aF=p.cur>=0?-.6:.1,WA=-.5;
+ if(p.ak){const a=atk(p),u=Math.min(1,p.at/a[0]),g=angAt(p,u);aF=g-Math.PI/2;WA=g}else if(run){aF=-Math.sin(ph)*.8;WA=-.3}else if(p.cur>=0)aF+=Math.sin(T*3)*.03;
+ D('acc',(run?-.25:0)+Math.sin(T*7+x*.05)*.1+tr*.5,bob);
+ LB('armB',aB,run?Math.max(0,-Math.sin(ph))*.5:.1,bob);
+ LB('legB',B1,B2,0);
+ D('torso',tr*.5+(run?.08:0)+(p.ak?.1:0),bob*.4);
+ LB('legF',F1,F2,0);
+ D('head',-tr*.3+Math.sin(T*3)*.02,bob);
+ const wk=p.cur>=0?(p.cur==L.w[0]?'w1':'w2'):0,a2=p.ak?0:.15;
+ LB('armF',aF,a2,bob,(d,ky)=>{if(!wk)return;const w=r[wk];c.save();c.translate(d.hx,d.h*.92-ky);c.rotate(WA-aF-a2);
+  if(p.cur==9){c.translate(34,0);const gr=c.createRadialGradient(0,0,2,0,0,46);gr.addColorStop(0,'#c77dffcc');gr.addColorStop(1,'#c77dff00');c.fillStyle=gr;c.fillRect(-46,-46,92,92)}
+  if(w.fl)c.scale(-1,1);c.drawImage(rigPart(p.c,wk,0),-w.gx*w.w,-w.gy*w.h);c.restore()});
+ if(p.ak&&CFG.parts){const a=atk(p),u=Math.min(1,p.at/a[0]);if(p.at>=a[1]-3&&p.at<=a[2]+6){const d=r.armF,R=(wk?r[wk].w:90)*.9+40,s0=angAt(p,Math.max(0,u-.35)),s1=angAt(p,u);
+  c.save();c.translate(d.ax,d.ay+bob);c.strokeStyle=L.col+'88';c.lineWidth=16;c.lineCap='round';c.beginPath();c.arc(0,0,R,s0,s1,s1<s0);c.stroke();c.restore()}}
+ c.restore()}
+function drawChar(c,p,x,y,vx,vy){const I=RIGIMG[p.c];(I&&I.ok?drawRig:drawChar0)(c,p,x,y,vx,vy)}
+rigLoad();

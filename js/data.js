@@ -27,9 +27,9 @@ const LG=[
 {n:'Zeph',sk:'#f1c27d',c2:'#5c1a1a',hair:6,acc:'scarf',r:'Artilheiro',col:'#ff5d5d',w:[12,8],str:7,dex:5,def:5,spd:5},
 {n:'Rue',sk:'#c68642',c2:'#7a1040',hair:7,acc:'scarf',r:'Velocista',col:'#f72585',w:[13,11],str:5,dex:8,def:4,spd:8}];
 LG.forEach(l=>{l.wt=1+(l.def-5)*.07;l.sp=3.4+l.spd*.28;l.jp=13.2+l.dex*.22});
-const SK=[{n:'Clássico',a:null,b:'#ffffff44',pat:'solid'},{n:'Tigre',a:'#ff9f1c',b:'#2b1b0e',pat:'stripe'},{n:'Cereja',a:'#d62839',b:'#ffd6dc',pat:'dots'},
-{n:'Xadrez',a:'#222',b:'#eee',pat:'checker'},{n:'Oceano',a:'#0077b6',b:'#90e0ef',pat:'wave'},{n:'Galáxia',a:'#1b0a3c',b:'#fff',pat:'stars'},
-{n:'Camuflado',a:'#4b5d2a',b:'#2f3b19',pat:'camo'},{n:'Ouro',a:'#b8860b',b:'#fff3b0',pat:'grad'}];
+const SK=[{n:'Clássico',a:null,b:'#ffffff44',pat:'solid'},{n:'Tigre',f:'hue-rotate(35deg) saturate(1.4)',a:'#ff9f1c',b:'#2b1b0e',pat:'stripe'},{n:'Cereja',f:'hue-rotate(320deg) saturate(1.5)',a:'#d62839',b:'#ffd6dc',pat:'dots'},
+{n:'Xadrez',f:'grayscale(1) contrast(1.2)',a:'#222',b:'#eee',pat:'checker'},{n:'Oceano',f:'hue-rotate(170deg)',a:'#0077b6',b:'#90e0ef',pat:'wave'},{n:'Galáxia',f:'hue-rotate(250deg) brightness(.8) saturate(1.3)',a:'#1b0a3c',b:'#fff',pat:'stars'},
+{n:'Camuflado',f:'hue-rotate(80deg) saturate(.6) brightness(.85)',a:'#4b5d2a',b:'#2f3b19',pat:'camo'},{n:'Ouro',f:'sepia(1) saturate(2.5) brightness(1.1)',a:'#b8860b',b:'#fff3b0',pat:'grad'}];
 const COLS=['#4cc9f0','#f72585','#ffd166','#06d6a0'];
 const plats=t=>[{x:300,w:600,y:480},{x:370,w:190,y:350,s:1},{x:640,w:190,y:350,s:1},{x:520+Math.sin(t/80)*170,w:160,y:215,s:1,dx:Math.cos(t/80)*170/80}];
 const storm=t=>t%1800>1300;
