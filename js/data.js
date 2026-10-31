@@ -18,18 +18,18 @@ const UN={L:[12,3,7,4,4,.04,34,40],H:[22,8,13,7,6,.07,40,46]}; // desarmado
 const ULT=[36,20,25,18,11,.12,0,0];
 // Lendas originais. Cada uma só usa suas 2 armas (como no Brawlhalla). str=dano, dex=esquiva, def=resistência, spd=velocidade
 const LG=[
-{n:'Kael',sk:'#f1c27d',c2:'#1b3a57',hair:0,acc:'scarf',r:'Espadachim',col:'#4cc9f0',w:[0,2],str:6,dex:6,def:5,spd:6},
-{n:'Brokk',sk:'#c68642',c2:'#5a2d1e',hair:5,acc:'cape',r:'Tanque',col:'#e76f51',w:[1,4],str:8,dex:3,def:8,spd:4},
-{n:'Lyra',sk:'#ffdbac',c2:'#2d5a27',hair:1,acc:'',r:'Arqueira',col:'#a0e870',w:[5,11],str:4,dex:8,def:4,spd:7},
-{n:'Nyx',sk:'#d9b8a0',c2:'#2a1040',hair:3,acc:'cape',r:'Assassina',col:'#c77dff',w:[7,3],str:6,dex:7,def:4,spd:7},
-{n:'Orin',sk:'#8d5524',c2:'#0b3c5d',hair:8,acc:'cape',r:'Mago',col:'#48cae4',w:[9,12],str:5,dex:6,def:5,spd:6},
-{n:'Tarn',sk:'#e0ac69',c2:'#6b4e16',hair:2,acc:'cape',r:'Guerreiro',col:'#ffd166',w:[10,6],str:8,dex:4,def:6,spd:5},
-{n:'Zeph',sk:'#f1c27d',c2:'#5c1a1a',hair:6,acc:'scarf',r:'Artilheiro',col:'#ff5d5d',w:[12,8],str:7,dex:5,def:5,spd:5},
-{n:'Rue',sk:'#c68642',c2:'#7a1040',hair:7,acc:'scarf',r:'Velocista',col:'#f72585',w:[13,11],str:5,dex:8,def:4,spd:8}];
+{n:'Kael',sk:'#e3ac3a',c2:'#1b3a57',hair:0,acc:'scarf',r:'Espadachim',col:'#4cc9f0',w:[0,2],str:6,dex:6,def:5,spd:6},
+{n:'Brokk',sk:'#e8a888',c2:'#5a2d1e',hair:5,acc:'cape',r:'Tanque',col:'#e76f51',w:[1,4],str:8,dex:3,def:8,spd:4},
+{n:'Lyra',sk:'#f2c4a0',c2:'#2d5a27',hair:1,acc:'',r:'Arqueira',col:'#a0e870',w:[5,11],str:4,dex:8,def:4,spd:7},
+{n:'Nyx',sk:'#e8c0a8',c2:'#2a1040',hair:3,acc:'cape',r:'Assassina',col:'#c77dff',w:[7,3],str:6,dex:7,def:4,spd:7},
+{n:'Orin',sk:'#7a4a30',c2:'#0b3c5d',hair:8,acc:'cape',r:'Mago',col:'#48cae4',w:[9,12],str:5,dex:6,def:5,spd:6},
+{n:'Tarn',sk:'#e0b020',c2:'#6b4e16',hair:2,acc:'cape',r:'Guerreiro',col:'#ffd166',w:[10,6],str:8,dex:4,def:6,spd:5},
+{n:'Zeph',sk:'#f0c0a0',c2:'#5c1a1a',hair:6,acc:'scarf',r:'Artilheiro',col:'#ff5d5d',w:[12,8],str:7,dex:5,def:5,spd:5},
+{n:'Rue',sk:'#8a5a3a',c2:'#7a1040',hair:7,acc:'scarf',r:'Velocista',col:'#f72585',w:[13,11],str:5,dex:8,def:4,spd:8}];
 LG.forEach(l=>{l.wt=1+(l.def-5)*.07;l.sp=3.4+l.spd*.28;l.jp=13.2+l.dex*.22});
-const SK=[{n:'Clássico',a:null,b:'#ffffff44',pat:'solid'},{n:'Tigre',f:'hue-rotate(35deg) saturate(1.4)',a:'#ff9f1c',b:'#2b1b0e',pat:'stripe'},{n:'Cereja',f:'hue-rotate(320deg) saturate(1.5)',a:'#d62839',b:'#ffd6dc',pat:'dots'},
-{n:'Xadrez',f:'grayscale(1) contrast(1.2)',a:'#222',b:'#eee',pat:'checker'},{n:'Oceano',f:'hue-rotate(170deg)',a:'#0077b6',b:'#90e0ef',pat:'wave'},{n:'Galáxia',f:'hue-rotate(250deg) brightness(.8) saturate(1.3)',a:'#1b0a3c',b:'#fff',pat:'stars'},
-{n:'Camuflado',f:'hue-rotate(80deg) saturate(.6) brightness(.85)',a:'#4b5d2a',b:'#2f3b19',pat:'camo'},{n:'Ouro',f:'sepia(1) saturate(2.5) brightness(1.1)',a:'#b8860b',b:'#fff3b0',pat:'grad'}];
+const SK=[{n:'Clássico',a:null,b:'#ffffff44',pat:'solid'},{n:'Tigre',h:35,s:1.3,l:1,a:'#ff9f1c',b:'#2b1b0e',pat:'stripe'},{n:'Cereja',h:-45,s:1.4,l:1,a:'#d62839',b:'#ffd6dc',pat:'dots'},
+{n:'Xadrez',h:0,s:0.05,l:1.1,a:'#222',b:'#eee',pat:'checker'},{n:'Oceano',h:170,s:1,l:1,a:'#0077b6',b:'#90e0ef',pat:'wave'},{n:'Galáxia',h:260,s:1.2,l:0.8,a:'#1b0a3c',b:'#fff',pat:'stars'},
+{n:'Camuflado',h:85,s:0.6,l:0.85,a:'#4b5d2a',b:'#2f3b19',pat:'camo'},{n:'Ouro',h:38,s:1.8,l:1.15,a:'#b8860b',b:'#fff3b0',pat:'grad'}];
 const COLS=['#4cc9f0','#f72585','#ffd166','#06d6a0'];
 const plats=t=>[{x:300,w:600,y:480},{x:370,w:190,y:350,s:1},{x:640,w:190,y:350,s:1},{x:520+Math.sin(t/80)*170,w:160,y:215,s:1,dx:Math.cos(t/80)*170/80}];
 const storm=t=>t%1800>1300;
