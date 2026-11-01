@@ -13,7 +13,7 @@ const WP=[
 {n:'Montante',k:'#9db4d9',h:0,v:52,L:[20,6,11,8,6,.06,75,56],H:[40,16,24,18,10,.14,95,76]},
 {n:'Blasters',k:'#ff9f1c',h:1,v:12,L:[14,4,7,4,4,.03,150,20],H:[28,10,14,9,6,.08,210,22]},
 {n:'Lança-foguete',k:'#ff5d5d',h:0,v:56,L:[18,5,10,6,6,.05,90,34],H:[36,14,20,14,10,.12,115,42]},
-{n:'Botas',k:'#8ecae6',h:1,v:8,L:[12,3,7,5,5,.05,48,40],H:[26,9,14,11,8,.10,60,50]}];
+{n:'Pistolas',k:'#8ecae6',h:1,v:8,L:[12,3,7,5,5,.05,48,40],H:[26,9,14,11,8,.10,60,50]}];
 const UN={L:[12,3,7,4,4,.04,34,40],H:[22,8,13,7,6,.07,40,46]}; // desarmado
 const ULT=[36,20,25,18,11,.12,0,0];
 // Lendas originais. Cada uma só usa suas 2 armas (como no Brawlhalla). str=dano, dex=esquiva, def=resistência, spd=velocidade
@@ -25,7 +25,7 @@ const LG=[
 {n:'Orin',sk:'#7a4a30',c2:'#0b3c5d',hair:8,acc:'cape',r:'Mago',col:'#48cae4',w:[9,12],str:5,dex:6,def:5,spd:6},
 {n:'Tarn',sk:'#e0b020',c2:'#6b4e16',hair:2,acc:'cape',r:'Guerreiro',col:'#ffd166',w:[10,6],str:8,dex:4,def:6,spd:5},
 {n:'Zeph',sk:'#f0c0a0',c2:'#5c1a1a',hair:6,acc:'scarf',r:'Artilheiro',col:'#ff5d5d',w:[12,8],str:7,dex:5,def:5,spd:5},
-{n:'Rue',sk:'#8a5a3a',c2:'#7a1040',hair:7,acc:'scarf',r:'Velocista',col:'#f72585',w:[13,11],str:5,dex:8,def:4,spd:8}];
+{n:'Rue',sk:'#8a5a3a',c2:'#7a1040',hair:7,acc:'scarf',r:'Velocista',col:'#f72585',w:[11,13],str:5,dex:8,def:4,spd:8}];
 LG.forEach(l=>{l.wt=1+(l.def-5)*.07;l.sp=3.4+l.spd*.28;l.jp=13.2+l.dex*.22});
 const SK=[{n:'Clássico',a:null,b:'#ffffff44',pat:'solid'},{n:'Tigre',h:35,s:1.3,l:1,a:'#ff9f1c',b:'#2b1b0e',pat:'stripe'},{n:'Cereja',h:-45,s:1.4,l:1,a:'#d62839',b:'#ffd6dc',pat:'dots'},
 {n:'Xadrez',h:0,s:0.05,l:1.1,a:'#222',b:'#eee',pat:'checker'},{n:'Oceano',h:170,s:1,l:1,a:'#0077b6',b:'#90e0ef',pat:'wave'},{n:'Galáxia',h:260,s:1.2,l:0.8,a:'#1b0a3c',b:'#fff',pat:'stars'},

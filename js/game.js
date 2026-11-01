@@ -76,8 +76,8 @@ function tick(){G.t++;PL=plats(G.t);itemsTick();
  const al=G.ps.filter(p=>!p.out);
  if(!G.win&&G.ps.length>1&&al.length<=1){G.win=al[0]?al[0].name:'Empate';G.wt=200;fx(['s',0,0,'w'])}
  if(G.win&&--G.wt<=0)reset();
- if(mode=='h'&&G.t%2==0){const s={t:'s',tm:G.t,w:G.win,l:G.lobby,i:G.items.map(i=>[i.w,i.x,i.y,i.th?1:0]),fx:outq.splice(0),p:G.ps.map(p=>[p.id,p.x,p.y,p.f,p.dmg|0,p.stocks,p.c,p.ak,p.at,p.ad,p.inv,p.ult|0,p.rs,p.g,p.hs,p.dg,p.name,p.out,p.sk,p.cur])};
+ if(mode=='h'&&G.t%2==0){const s={t:'s',tm:G.t,w:G.win,l:G.lobby,i:G.items.map(i=>[i.w,i.x,i.y,i.th?1:0]),fx:outq.splice(0),p:G.ps.map(p=>[p.id,p.x,p.y,p.f,p.dmg|0,p.stocks,p.c,p.ak,p.at,p.ad,p.inv,p.ult|0,p.rs,p.g,p.hs,p.dg,p.name,p.out,p.sk,p.cur,(p.has[0]|0)+(p.has[1]|0)*2])};
   Object.values(conns).forEach(c=>c.open&&c.send(s))}}
 function apply(d){G.t=d.tm;G.win=d.w;G.lobby=d.l;G.items=d.i.map(([w,x,y,th])=>({w,x,y,th}));d.fx.forEach(fxh);const old=new Map(G.ps.map(p=>[p.id,p]));
- G.ps=d.p.map(a=>{const[id,x,y,f,dmg,stocks,c,ak,at,ad,inv,ult,rs,gr,hs,dg,name,out,sk,cur]=a,p=old.get(id)||{id};
-  return Object.assign(p,{x,y,f,dmg,stocks,c,ak,at,ad,inv,ult,rs,g:gr,hs,dg,name,out,sk,cur})})}
+ G.ps=d.p.map(a=>{const[id,x,y,f,dmg,stocks,c,ak,at,ad,inv,ult,rs,gr,hs,dg,name,out,sk,cur,hv]=a,p=old.get(id)||{id};
+  return Object.assign(p,{x,y,f,dmg,stocks,c,ak,at,ad,inv,ult,rs,g:gr,hs,dg,name,out,sk,cur,has:[hv&1,hv>>1&1]})})}
