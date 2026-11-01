@@ -37,7 +37,7 @@ function step(p,I,t){const c=LG[p.c],pd=I&~p.pi;p.pi=I;
  if(free&&dir)p.f=dir;
  if(free&&p.cd<=0&&pd&128){p.dg=14;p.inv=16;fx(['s',0,0,'d']);p.cd=70-c.dex*3;p.vx=(dir||p.f)*11;p.vy=0}
  else if(free){
-  if(pd&96){p.ak=pd&32?1:2;fx(['s',0,0,'a']);p.at=0;p.ad=I&4?1:(D&&!p.g?2:0);p.hit=[]}
+  if(pd&96){p.ak=pd&32?1:2;p.at=0;p.ad=I&4?1:(D&&!p.g?2:0);p.hit=[]}
   else if(pd&256&&p.ult>=100){p.ak=3;fx(['s',0,0,'u']);p.at=0;p.ad=0;p.hit=[];p.ult=0}
   if(pd&16&&p.jumps>0){p.vy=-c.jp;p.jumps--;p.g=0;fx(['s',0,0,'j'])}
   if(pd&1024&&p.has[0]&&p.has[1])p.cur=p.cur==c.w[0]?c.w[1]:c.w[0];
@@ -48,6 +48,7 @@ function step(p,I,t){const c=LG[p.c],pd=I&~p.pi;p.pi=I;
   if(p.ak==2&&p.at==a[1])p.vx+=p.f*3;
   p.vx*=p.g?.8:.97;
   if(p.ak==3&&p.at<a[1])p.inv=2;
+  if(p.at==a[1]&&p.ak!=3)fx(['s',0,0,[8,11,13].includes(p.cur)?'g':p.cur==5?'b':p.ak==2?'sw2':'sw1']);
   if(p.at>=a[1]&&p.at<=a[2])strike(p,a);
   if(p.at>=a[0])p.ak=0}
  else p.vx+=(dir*c.sp-p.vx)*(p.g?.25:.09);

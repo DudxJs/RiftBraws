@@ -11,8 +11,7 @@ function draw(){const st=storm(G.t),T=G.t%1800,tt=performance.now()/1000;g.save(
   p.rx=mode=='gst'&&p.rx!=null?p.rx+(p.x-p.rx)*.5:p.x;p.ry=mode=='gst'&&p.ry!=null?p.ry+(p.y-p.ry)*.5:p.y;
   const x=p.rx,y=p.ry,col=COLS[p.id%4],vx=x-(p.px??x),vy=y-(p.py??y);p.px=x;p.py=y;
   if(x<0||x>W||y<0||y>H){g.fillStyle=col;g.beginPath();g.arc(Math.max(14,Math.min(W-14,x)),Math.max(14,Math.min(H-14,y)),10,0,6.3);g.fill();return}
-  if(p.ak){const a=atk(p);if(p.at>=a[1]&&p.at<=a[2]){const b=hb(p);g.fillStyle=LG[p.c].col+'55';g.strokeStyle=LG[p.c].col;g.lineWidth=3;
-   if(b.circ){g.beginPath();g.arc(b.x,b.y,b.r*(.6+(p.at-a[1])/10),0,6.3);g.stroke();g.fill()}else{g.beginPath();g.roundRect(b.x-b.w/2,b.y-b.h/2,b.w,b.h,14);g.fill();g.stroke()}}}
+  if(p.ak==3){const a=atk(p);if(p.at>=a[1]&&p.at<=a[2]+6){const b=hb(p),k=(p.at-a[1])/(a[2]-a[1]+6);g.save();g.globalAlpha=1-k;g.strokeStyle='#fff';g.lineWidth=2+8*(1-k);g.beginPath();g.arc(b.x,b.y,b.r*(.3+k*.8),0,6.3);g.stroke();g.strokeStyle=LG[p.c].col;g.lineWidth=4;g.beginPath();g.arc(b.x,b.y,b.r*(.2+k*.85),0,6.3);g.stroke();g.restore()}}
   drawChar(g,p,x,y,vx,vy);
   g.fillStyle=col;g.font='13px system-ui';g.textAlign='center';g.fillText(p.name+(p.id==me?' ★':''),x,y-96)});
  parts=parts.filter(p=>--p.l>0);parts.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.vy+=.2;g.globalAlpha=p.l/30;g.fillStyle=p.c;g.fillRect(p.x,p.y,5,5)});g.globalAlpha=1;
