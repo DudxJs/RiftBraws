@@ -15,8 +15,9 @@ function itemsTick(){
  G.items=G.items.filter(i=>!i.dead);
  if(G.t%300==30&&G.items.length<3&&G.ps.length){const ws=G.ps.flatMap(p=>LG[p.c].w);G.items.push({id:++iid,w:ws[Math.random()*ws.length|0],x:350+Math.random()*500,y:-30,vx:0,vy:0,th:0})}}
 function fx(e){if(mode=='h')outq.push(e);fxh(e)}
-function fxh(e){const[k,x,y,m]=e;if(k=='s')return sfx(m);sfx(k);const n=CFG.parts?(k=='h'?8+(m|0):30):0;if(CFG.shake)shake=Math.max(shake,k=='h'?Math.min(m/2,12):16);
+function fxh(e){const[k,x,y,m,wk]=e;if(k=='s')return sfx(m);sfx(k=='h'?['h','hb','hg'][wk|0]:k);const n=CFG.parts?(k=='h'?8+(m|0):30):0;if(CFG.shake)shake=Math.max(shake,k=='h'?Math.min(m/2,12):16);
  for(let i=0;i<n;i++){const a=Math.random()*6.28,s=Math.random()*(k=='h'?5:10)+2;parts.push({x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s,l:30,c:k=='h'?'#fff':COLS[m%4]})}}
+const HK=w=>w<0?1:[8,11,13,5].includes(w)?2:[1,4,6,9,10].includes(w)?1:0;
 function strike(p,a){const b=hb(p);
  for(const q of G.ps){if(q==p||q.out||q.rs>0||q.inv>0||p.hit.includes(q.id))continue;
   const qx=q.x,qy=q.y-28,ok=b.circ?Math.hypot(qx-b.x,qy-b.y)<b.r+22:Math.abs(qx-b.x)<b.w/2+18&&Math.abs(qy-b.y)<b.h/2+28;
@@ -24,39 +25,41 @@ function strike(p,a){const b=hb(p);
   const m=(a[4]+q.dmg*a[5])/LG[q.c].wt,dx=b.circ?(Math.sign(q.x-p.x)||p.f):p.f;
   if(p.ad==1&&!b.circ){q.vx=dx*m*.3;q.vy=-m*1.1}
   else if(p.ad==2&&!q.g&&!b.circ){q.vx=dx*m*.3;q.vy=m*.9}
-  else{q.vx=dx*m*.95;q.vy=-m*(b.circ?.7:.5)}
+  else{q.vx=dx*m*(p.ak==1?.7:.95);q.vy=-m*(b.circ?.7:p.ak==1?.75:.5)}
   q.hs=Math.min(45,8+m*1.5)|0;q.ak=0;q.dg=0;q.g=0;
-  p.ult=Math.min(100,p.ult+a[3]*1.6);q.ult=Math.min(100,q.ult+a[3]);fx(['h',qx,qy,m])}}
-function spawn(p){p.x=350+Math.random()*500;p.y=-60;p.vx=p.vy=0;p.inv=150;p.jumps=2;p.dmg=0}
+  p.ult=Math.min(100,p.ult+a[3]*1.6);q.ult=Math.min(100,q.ult+a[3]);if(q.cw>0&&q.ca==p.id)q.cn++;else q.cn=1;q.cw=55;q.ca=p.id;if(q.cn==3||q.cn==5)fx(['s',0,0,'cb']);G.stop=Math.max(G.stop|0,Math.min(7,Math.round(2+m*.2)));fx(['h',qx,qy,m,HK(p.cur)])}}
+function spawn(p){p.x=350+Math.random()*500;p.y=-60;p.vx=p.vy=0;p.inv=150;p.jumps=3;p.dmg=0}
 function step(p,I,t){const c=LG[p.c],pd=I&~p.pi;p.pi=I;
  if(p.rs>0){if(--p.rs==0&&!p.out)spawn(p);return}
  if(p.out)return;
  const D=I&8,dir=(I&2?1:0)-(I&1?1:0);
- ['inv','cd','hs','dt'].forEach(k=>p[k]>0&&p[k]--);
- const free=p.hs<=0&&!p.ak&&!p.dg;
- if(free&&dir)p.f=dir;
- if(free&&p.cd<=0&&pd&128){p.dg=14;p.inv=16;fx(['s',0,0,'d']);p.cd=70-c.dex*3;p.vx=(dir||p.f)*11;p.vy=0}
- else if(free){
-  if(pd&96){p.ak=pd&32?1:2;p.at=0;p.ad=I&4?1:(D&&!p.g?2:0);p.hit=[]}
-  else if(pd&256&&p.ult>=100){p.ak=3;fx(['s',0,0,'u']);p.at=0;p.ad=0;p.hit=[];p.ult=0}
-  if(pd&16&&p.jumps>0){p.vy=-c.jp;p.jumps--;p.g=0;fx(['s',0,0,'j'])}
+ ['inv','cd','hs','dt','cw'].forEach(k=>p[k]>0&&p[k]--);
+ const AB=2032;p.bb=(p.bb||0)|(pd&AB);p.bt=pd&AB?7:(p.bt||0)-1;if(p.bt<=0)p.bb=0;const pb=p.bb;
+ // pode agir se livre OU se estiver cancelando um golpe (depois de acertar ou quando a parte ativa acabou) -> combos livres
+ const A_=p.ak&&p.ak!=3?atk(p):null,can=p.hs<=0&&!p.dg&&(!p.ak||(A_&&((p.hit.length>0&&p.at>=A_[1])||p.at>A_[2])));
+ if(can&&dir)p.f=dir;
+ if(can&&p.cd<=0&&(pb&128)){p.ak=0;p.bb&=~128;p.dg=14;p.inv=16;fx(['s',0,0,'d']);p.cd=55-c.dex*3;p.vx=(dir||p.f)*11;p.vy=0}
+ else if(can){
+  if(pb&96){p.ak=pb&32?1:2;p.bb&=~96;p.at=0;p.ad=I&4?1:(D&&!p.g?2:0);p.hit=[]}
+  else if(pb&256&&p.ult>=100&&!p.ak){p.bb&=~256;p.ak=3;fx(['s',0,0,'u']);p.at=0;p.ad=0;p.hit=[];p.ult=0}
+  if(pb&16&&p.jumps>0){p.bb&=~16;p.ak=0;p.vy=-c.jp;p.jumps--;p.g=0;fx(['s',0,0,'j'])}
   if(pd&1024&&p.has[0]&&p.has[1])p.cur=p.cur==c.w[0]?c.w[1]:c.w[0];
   if(pd&512)pick(p)}
  if(p.dg){p.vy=0;p.vx*=.88;p.dg--}
  else if(p.hs>0)p.vx*=.985;
  else if(p.ak){const a=atk(p);p.at++;
-  if(p.ak==2&&p.at==a[1])p.vx+=p.f*3;
+  if(p.at==a[1]){if(p.ak==2)p.vx+=p.f*3;if(p.ak==1)p.vx+=p.f*1.2;if(p.ak==2&&p.ad==1&&!p.g&&!p.rc){p.rc=1;p.vy=-11}}
   p.vx*=p.g?.8:.97;
   if(p.ak==3&&p.at<a[1])p.inv=2;
   if(p.at==a[1]&&p.ak!=3)fx(['s',0,0,[8,11,13].includes(p.cur)?'g':p.cur==5?'b':p.ak==2?'sw2':'sw1']);
   if(p.at>=a[1]&&p.at<=a[2])strike(p,a);
   if(p.at>=a[0])p.ak=0}
- else p.vx+=(dir*c.sp-p.vx)*(p.g?.25:.09);
- if(!p.dg){const st=storm(t);p.vy+=st?.45:.85;if(D&&p.vy>0&&p.hs<=0)p.vy+=.6;if(p.hs<=0)p.vy=Math.min(p.vy,st?9:17)}
+ else p.vx+=(dir*c.sp-p.vx)*(p.g?.3:.14);
+ if(!p.dg){const st=storm(t);p.vy+=(st?.45:.85)*(p.ak&&!p.g?.65:1);if(D&&p.vy>0&&p.hs<=0)p.vy+=.6;if(p.hs<=0)p.vy=Math.min(p.vy,st?9:17)}
  if(pd&8&&p.pl&&p.pl.s)p.dt=14;
  p.x+=p.vx;const py=p.y;p.y+=p.vy;p.g=0;p.pl=null;
  if(p.vy>=0)for(const q of PL){if(q.s&&p.dt>0)continue;
-  if(py<=q.y+2&&p.y>=q.y&&p.x+14>q.x&&p.x-14<q.x+q.w){p.y=q.y;p.vy=0;p.g=1;p.jumps=2;p.pl=q;p.x+=q.dx||0;break}}
+  if(py<=q.y+2&&p.y>=q.y&&p.x+14>q.x&&p.x-14<q.x+q.w){if(p.vy>9)fx(['s',0,0,'l']);p.y=q.y;p.vy=0;p.g=1;p.jumps=3;p.rc=0;p.pl=q;p.x+=q.dx||0;break}}
  if(p.x<-250||p.x>1450||p.y>900||p.y<-450){
   fx(['k',Math.max(30,Math.min(1170,p.x)),Math.max(30,Math.min(670,p.y)),p.c]);
   p.stocks--;p.rs=90;p.vx=p.vy=0;p.ak=0;p.hs=0;if(p.stocks<=0)p.out=1}}
@@ -73,12 +76,12 @@ function ai(p){const o=G.ps.filter(q=>q!=p&&!q.out&&q.rs<=0).sort((a,b)=>Math.ab
 function reset(){G.ps.forEach(p=>{p.stocks=CFG.stocks;p.cur=-1;p.has=[0,0];p.dmg=0;p.ult=0;p.out=0;p.rs=40;p.ak=0;p.hs=0;p.dg=0});G.win=null;G.items=[]}
 function tick(){G.t++;PL=plats(G.t);itemsTick();
  if(G.lobby){for(const p of G.ps){p.rs=40;p.stocks=CFG.stocks;p.dmg=0;p.cur=-1;p.has=[0,0];p.ult=0}G.items=[];G.win=null}
- for(const p of G.ps){let I;if(p.id==me)I=getInput();else if(p.bot)I=ai(p);else{I=p.raw|p.press;p.press=0}step(p,I,G.t)}
+ if(G.stop>0)G.stop--;else for(const p of G.ps){let I;if(p.id==me)I=getInput();else if(p.bot)I=ai(p);else{I=p.raw|p.press;p.press=0}step(p,I,G.t)}
  const al=G.ps.filter(p=>!p.out);
  if(!G.win&&G.ps.length>1&&al.length<=1){G.win=al[0]?al[0].name:'Empate';G.wt=200;fx(['s',0,0,'w'])}
  if(G.win&&--G.wt<=0)reset();
- if(mode=='h'&&G.t%2==0){const s={t:'s',tm:G.t,w:G.win,l:G.lobby,i:G.items.map(i=>[i.w,i.x,i.y,i.th?1:0]),fx:outq.splice(0),p:G.ps.map(p=>[p.id,p.x,p.y,p.f,p.dmg|0,p.stocks,p.c,p.ak,p.at,p.ad,p.inv,p.ult|0,p.rs,p.g,p.hs,p.dg,p.name,p.out,p.sk,p.cur,(p.has[0]|0)+(p.has[1]|0)*2])};
+ if(mode=='h'&&G.t%2==0){const s={t:'s',tm:G.t,w:G.win,l:G.lobby,i:G.items.map(i=>[i.w,i.x,i.y,i.th?1:0]),fx:outq.splice(0),p:G.ps.map(p=>[p.id,p.x,p.y,p.f,p.dmg|0,p.stocks,p.c,p.ak,p.at,p.ad,p.inv,p.ult|0,p.rs,p.g,p.hs,p.dg,p.name,p.out,p.sk,p.cur,(p.has[0]|0)+(p.has[1]|0)*2,p.cw>0?p.cn:0])};
   Object.values(conns).forEach(c=>c.open&&c.send(s))}}
 function apply(d){G.t=d.tm;G.win=d.w;G.lobby=d.l;G.items=d.i.map(([w,x,y,th])=>({w,x,y,th}));d.fx.forEach(fxh);const old=new Map(G.ps.map(p=>[p.id,p]));
- G.ps=d.p.map(a=>{const[id,x,y,f,dmg,stocks,c,ak,at,ad,inv,ult,rs,gr,hs,dg,name,out,sk,cur,hv]=a,p=old.get(id)||{id};
-  return Object.assign(p,{x,y,f,dmg,stocks,c,ak,at,ad,inv,ult,rs,g:gr,hs,dg,name,out,sk,cur,has:[hv&1,hv>>1&1]})})}
+ G.ps=d.p.map(a=>{const[id,x,y,f,dmg,stocks,c,ak,at,ad,inv,ult,rs,gr,hs,dg,name,out,sk,cur,hv,cn]=a,p=old.get(id)||{id};
+  return Object.assign(p,{x,y,f,dmg,stocks,c,ak,at,ad,inv,ult,rs,g:gr,hs,dg,name,out,sk,cur,has:[hv&1,hv>>1&1],cn})})}
